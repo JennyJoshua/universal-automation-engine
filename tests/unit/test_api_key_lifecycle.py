@@ -2,9 +2,8 @@
 
 from datetime import UTC, datetime, timedelta
 
-from pydantic import ValidationError
-
 import pytest
+from pydantic import ValidationError
 
 from universal_automation.security import (
     APIKeyAuthenticationError,
