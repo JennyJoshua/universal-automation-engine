@@ -6,7 +6,7 @@ import hashlib
 import hmac
 from collections.abc import Mapping
 
-from universal_automation.security import ExecutionPrincipal
+from universal_automation.security.policy import ExecutionPrincipal
 from universal_automation.security.api_keys import APIKeyAuthenticationError, APIKeyManager
 
 
