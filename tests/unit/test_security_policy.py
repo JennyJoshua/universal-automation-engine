@@ -1,6 +1,6 @@
 """Tests for trusted execution permissions and approval policies."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from pydantic import ValidationError
@@ -49,7 +49,7 @@ def make_approval(
     approved_at: datetime | None = None,
     expires_at: datetime | None = None,
 ) -> ApprovalGrant:
-    current = datetime(2026, 11, 20, 12, 0, tzinfo=timezone.utc)
+    current = datetime(2026, 11, 20, 12, 0, tzinfo=UTC)
     return ApprovalGrant(
         approval_id="approval-789",
         subject_id=subject_id,
@@ -124,7 +124,7 @@ def test_matching_unexpired_approval_allows_authorization() -> None:
         subject_id="user-123",
         permissions={"files.delete", "workspace.write"},
     )
-    now = datetime(2026, 11, 20, 12, 0, tzinfo=timezone.utc)
+    now = datetime(2026, 11, 20, 12, 0, tzinfo=UTC)
 
     AuthorizationPolicy().authorize(
         principal,
@@ -143,9 +143,9 @@ def test_matching_unexpired_approval_allows_authorization() -> None:
         make_approval(capability_name="read_files"),
         make_approval(request_id="another-request"),
         make_approval(
-            expires_at=datetime(2026, 11, 20, 11, 59, 30, tzinfo=timezone.utc)
+            expires_at=datetime(2026, 11, 20, 11, 59, 30, tzinfo=UTC)
         ),
-        make_approval(approved_at=datetime(2026, 11, 20, 12, 1, tzinfo=timezone.utc)),
+        make_approval(approved_at=datetime(2026, 11, 20, 12, 1, tzinfo=UTC)),
     ],
 )
 def test_mismatched_or_inactive_approval_is_rejected(approval: ApprovalGrant) -> None:
@@ -154,7 +154,7 @@ def test_mismatched_or_inactive_approval_is_rejected(approval: ApprovalGrant) ->
         subject_id="user-123",
         permissions={"files.delete", "workspace.write"},
     )
-    now = datetime(2026, 11, 20, 12, 0, tzinfo=timezone.utc)
+    now = datetime(2026, 11, 20, 12, 0, tzinfo=UTC)
 
     with pytest.raises(InvalidApprovalError):
         AuthorizationPolicy().authorize(
@@ -191,7 +191,7 @@ def test_naive_approval_timestamps_are_rejected() -> None:
 
 
 def test_approval_expiry_must_follow_approval_time() -> None:
-    approved_at = datetime(2026, 11, 20, 12, 0, tzinfo=timezone.utc)
+    approved_at = datetime(2026, 11, 20, 12, 0, tzinfo=UTC)
 
     with pytest.raises(ValidationError, match="later than"):
         make_approval(approved_at=approved_at, expires_at=approved_at)
