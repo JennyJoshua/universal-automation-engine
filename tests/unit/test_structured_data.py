@@ -122,7 +122,7 @@ def test_csv_write_neutralizes_formula_like_headers(tmp_path):
         {"path": "headers.csv", "headers": ["=SUM(A1:A2)"], "rows": [["safe"]]},
     )
     assert (tmp_path / "headers.csv").read_text(encoding="utf-8").startswith(
-        "'=SUM(A1:A2)\\nsafe\\n"
+        "'=SUM(A1:A2)\nsafe\n"
     )
 
 
