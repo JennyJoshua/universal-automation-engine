@@ -106,3 +106,138 @@ def test_workflow_runner_composes_registered_capabilities():
     assert result.status == "succeeded"
     assert seen == ["ORDER-001"]
     assert [step.status for step in result.step_results] == ["succeeded", "succeeded"]
+
+
+def test_workflow_failure_runs_compensation_and_stops_remaining_steps():
+    registry = PluginRegistry()
+    manifest = PluginManifest(
+        plugin_id="example.rollback",
+        display_name="Rollback Integration Capabilities",
+        version="1.0.0",
+        description="Failure and compensation integration fixture.",
+        capabilities=(
+            CapabilitySpec(
+                name="create_resource",
+                description="Create a resource.",
+                input_schema={"type": "object", "properties": {}, "additionalProperties": False},
+                output_schema={
+                    "type": "object",
+                    "properties": {"resource_id": {"type": "string"}},
+                    "required": ["resource_id"],
+                    "additionalProperties": False,
+                },
+                permissions=("resource.create",),
+            ),
+            CapabilitySpec(
+                name="remove_resource",
+                description="Remove a created resource.",
+                input_schema={
+                    "type": "object",
+                    "properties": {"resource_id": {"type": "string"}},
+                    "required": ["resource_id"],
+                    "additionalProperties": False,
+                },
+                output_schema={
+                    "type": "object",
+                    "properties": {"removed": {"type": "boolean"}},
+                    "required": ["removed"],
+                    "additionalProperties": False,
+                },
+                permissions=("resource.remove",),
+            ),
+            CapabilitySpec(
+                name="fail_operation",
+                description="Fail to trigger compensation.",
+                input_schema={"type": "object", "properties": {}, "additionalProperties": False},
+                output_schema={
+                    "type": "object",
+                    "properties": {"ok": {"type": "boolean"}},
+                    "required": ["ok"],
+                    "additionalProperties": False,
+                },
+                permissions=("operation.run",),
+            ),
+            CapabilitySpec(
+                name="never_run",
+                description="A later step that must not run.",
+                input_schema={"type": "object", "properties": {}, "additionalProperties": False},
+                output_schema={
+                    "type": "object",
+                    "properties": {"ok": {"type": "boolean"}},
+                    "required": ["ok"],
+                    "additionalProperties": False,
+                },
+                permissions=("operation.run",),
+            ),
+        ),
+    )
+    registry.register(manifest)
+    executor = CapabilityExecutor(registry, AuthorizationPolicy())
+    calls = []
+
+    def create_resource(_data):
+        calls.append("create")
+        return {"resource_id": "RES-9"}
+
+    def remove_resource(data):
+        calls.append(("remove", data["resource_id"]))
+        return {"removed": True}
+
+    def fail_operation(_data):
+        calls.append("fail")
+        raise RuntimeError("internal integration failure")
+
+    def never_run(_data):
+        calls.append("never")
+        return {"ok": True}
+
+    executor.register_handler("example.rollback", "create_resource", create_resource)
+    executor.register_handler("example.rollback", "remove_resource", remove_resource)
+    executor.register_handler("example.rollback", "fail_operation", fail_operation)
+    executor.register_handler("example.rollback", "never_run", never_run)
+    workflow = WorkflowDefinition(
+        workflow_id="integration.rollback",
+        version="1.0.0",
+        description="Compensate a completed step after a later step fails.",
+        steps=(
+            WorkflowStep(
+                step_id="create",
+                plugin_id="example.rollback",
+                capability_name="create_resource",
+                compensation={
+                    "plugin_id": "example.rollback",
+                    "capability_name": "remove_resource",
+                    "mappings": [
+                        {
+                            "source_step_id": "create",
+                            "source_path": "resource_id",
+                            "target_path": "resource_id",
+                        }
+                    ],
+                },
+            ),
+            WorkflowStep(
+                step_id="fail",
+                plugin_id="example.rollback",
+                capability_name="fail_operation",
+            ),
+            WorkflowStep(
+                step_id="never",
+                plugin_id="example.rollback",
+                capability_name="never_run",
+            ),
+        ),
+    )
+    principal = ExecutionPrincipal(
+        subject_id="rollback-user",
+        permissions={"resource.create", "resource.remove", "operation.run"},
+    )
+
+    result = WorkflowRunner(executor).execute(workflow, principal, "rollback-run-1")
+
+    assert result.status == "failed"
+    assert calls == ["create", "fail", ("remove", "RES-9")]
+    assert [item.status for item in result.step_results] == [
+        "compensated",
+        "failed",
+    ]
