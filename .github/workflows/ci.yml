@@ -32,9 +32,6 @@ jobs:
       - name: Install package and development tools
         run: python -m pip install --upgrade pip && python -m pip install -e ".[dev,mcp]"
 
-      - name: Show Ruff import-order suggestion
-        run: ruff check --fix --diff src/universal_automation/interfaces/mcp/server.py || true
-
       - name: Run Ruff
         run: ruff check .
 
