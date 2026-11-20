@@ -14,6 +14,12 @@ A modular, API-first automation engine designed to expose reusable automation ca
 - Secure-by-default execution with explicit permissions and approvals for sensitive actions.
 - Free and open-source development tooling wherever practical.
 
+## Integration interfaces
+
+- REST API: see [API Reference](docs/API_REFERENCE.md).
+- MCP server: see [MCP Integration](docs/MCP_INTEGRATION.md). Install the optional `mcp` extra to enable MCP support.
+- Plugin contract: see [Plugin Contract](docs/PLUGIN_CONTRACT.md).
+
 ## Planned initial capabilities
 
 1. File automation
