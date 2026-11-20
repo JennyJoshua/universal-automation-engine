@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import hmac
-import secrets
 import re
+import secrets
 from datetime import UTC, datetime
 from threading import RLock
 from typing import Protocol
@@ -201,7 +201,7 @@ class APIKeyManager:
     ) -> ExecutionPrincipal:
         """Validate a raw key and return a server-created execution principal."""
         current = self._current_time(now)
-        if not isinstance(api_key, str):
+        if not isinstance(api_key, str) or len(api_key) > 128:
             raise APIKeyAuthenticationError("Invalid API key")
         try:
             prefix, secret = api_key.split(".", 1)
