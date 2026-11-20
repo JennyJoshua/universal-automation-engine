@@ -336,9 +336,11 @@ class FileAutomationModule:
                 try:
                     size = file_path.stat().st_size
                 except OSError:
+                    truncated = True
                     continue
 
                 if size > self._max_file_bytes:
+                    truncated = True
                     continue
                 if bytes_scanned + size > self._max_scan_bytes:
                     truncated = True
@@ -358,7 +360,10 @@ class FileAutomationModule:
                         break
                     bytes_scanned += len(raw)
                     content = raw.decode("utf-8")
-                except (OSError, UnicodeDecodeError):
+                except OSError:
+                    truncated = True
+                    continue
+                except UnicodeDecodeError:
                     continue
 
                 relative_path = self._relative_path(file_path)
