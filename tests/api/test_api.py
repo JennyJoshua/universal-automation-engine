@@ -1,8 +1,7 @@
 """Tests for the authenticated REST API."""
 
-from fastapi.testclient import TestClient
-
 import pytest
+from fastapi.testclient import TestClient
 
 from universal_automation.core.contracts import CapabilitySpec, PluginManifest
 from universal_automation.core.execution import CapabilityExecutor
