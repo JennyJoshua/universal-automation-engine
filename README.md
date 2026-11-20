@@ -12,7 +12,8 @@ A modular, API-first Python automation engine that exposes reusable automation c
 - FastAPI REST interface.
 - MCP adapter for compatible clients.
 - Workspace-confined, read-only file automation.
-- New Markdown, text, JSON, PDF, DOCX, and XLSX document creation.\n- Bounded CSV/JSON data operations, record transformations, and optional XLSX extraction.
+- New Markdown, text, JSON, PDF, DOCX, and XLSX document creation.
+- Bounded CSV/JSON data operations, record transformations, and optional XLSX extraction.
 - Automated tests and CI for Python 3.12 and 3.13.
 
 See [Project Status](PROJECT_STATUS.md) for the verified implementation snapshot and known limitations.
@@ -25,7 +26,8 @@ See [Project Status](PROJECT_STATUS.md) for the verified implementation snapshot
 - [Plugin registry](docs/PLUGIN_REGISTRY.md)
 - [Capability execution](docs/CAPABILITY_EXECUTION.md)
 - [File automation](docs/FILE_AUTOMATION.md)
-- [Document automation](docs/DOCUMENT_AUTOMATION.md)\n- [Structured data automation](docs/STRUCTURED_DATA_AUTOMATION.md)
+- [Document automation](docs/DOCUMENT_AUTOMATION.md)
+- [Structured data automation](docs/STRUCTURED_DATA_AUTOMATION.md)
 
 ## Installation
 
@@ -43,8 +45,11 @@ Install optional integrations as needed:
 # MCP server support
 python -m pip install -e ".[mcp]"
 
-# PDF, Word, and Excel document generation\n# Structured data XLSX extraction
-python -m pip install -e ".[documents]"\n\n# Structured data XLSX extraction (included in the documents extra)
+# PDF, Word, and Excel document generation
+# Structured data XLSX extraction
+python -m pip install -e ".[documents]"
+
+# Structured data XLSX extraction (included in the documents extra)
 
 # All current optional integrations for development/testing
 python -m pip install -e ".[dev,mcp,documents]"
