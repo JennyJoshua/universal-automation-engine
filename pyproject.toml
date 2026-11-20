@@ -22,6 +22,9 @@ dev = [
   "ruff>=0.7,<1.0",
   "httpx>=0.27,<1.0",
 ]
+mcp = [
+  "mcp>=2.0,<3.0",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/universal_automation"]
