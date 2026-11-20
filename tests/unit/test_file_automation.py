@@ -247,7 +247,7 @@ def test_module_rejects_non_positive_limits(tmp_path) -> None:
 
 
 def test_search_counts_binary_bytes_against_scan_budget(tmp_path) -> None:
-    (tmp_path / "a-binary.dat").write_bytes(b"\\xff\\xfe\\x00")
+    (tmp_path / "a-binary.dat").write_bytes(bytes([255, 254, 0]))
     (tmp_path / "b-text.txt").write_text("needle", encoding="utf-8")
     _, _, executor, principal = make_engine(tmp_path, max_scan_bytes=3)
 
