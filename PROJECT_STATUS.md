@@ -34,7 +34,7 @@ This is an implemented development baseline, **not yet a production-ready or sta
 | Registry | Implemented | Registration and discovery |
 | Capability execution | Implemented | In-process handler execution |
 | Security policy | Initial implementation | Permission checks and request-bound approval-grant validation primitives |
-| REST API | Initial implementation | API-key mapping supplied by host; no key lifecycle management |
+| REST API | Initial implementation | Managed API-key lifecycle available; default store is in-memory; static mapping retained for compatibility |
 | MCP adapter | Initial implementation | Local stdio and optional authenticated remote transport |
 | File automation | Initial implementation | Workspace-confined, read-only file operations |
 | Document creation | Initial implementation | New-file creation; no overwrite/update/delete |
@@ -46,7 +46,7 @@ This is an implemented development baseline, **not yet a production-ready or sta
 ## Known limitations and risks
 
 1. Execution is synchronous/in-process; no general sandbox or hard execution timeout is provided.
-2. REST API keys and principals are injected by the host in memory. Issuance, rotation, revocation, and persistent identity management are not implemented.
+2. Managed API-key issuance, expiry, rotation, and revocation are available, but the default store is in-memory; hosts must provide a persistent APIKeyStore for durable or multi-process deployments.
 3. Approval validation primitives exist, but there is no built-in approval request, decision, storage, or reviewer workflow.
 4. There is no persistent workflow definition or execution-history store.
 5. Third-party plugin discovery/loading and isolation are not implemented.
