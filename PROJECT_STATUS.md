@@ -3,7 +3,7 @@
 **Status date:** 2026-11-20  
 **Current release line:** 0.1.0 (pre-release)  
 **Default branch:** `main`  
-**Current baseline commit:** `28f2d3e1d0d2b60b346d6a111047be9928feb827`
+**Current baseline commit:** `d1ab949f18ae8fd80af19b9c741903c0f79f006b`
 
 ## Executive summary
 
@@ -19,7 +19,7 @@ The repository has completed its initial foundation and currently contains:
 - Read-only file automation.
 - New Markdown, text, JSON, PDF, DOCX, and XLSX document creation (office/PDF formats use optional dependencies).
 - Bounded CSV/JSON reading and writing, JSON record transformations, and optional XLSX extraction.
-- Sequential workflow orchestration with versioned contracts, field mappings, conditions, per-step authorization, and compensation.
+- Sequential workflow orchestration with versioned contracts, field mappings, conditions, per-step authorization, and compensation.\n- Managed API-key lifecycle with high-entropy issuance, SHA-256 digest storage, expiry, rotation, revocation, and REST integration.
 - Unit, API, MCP, and integration test suites.
 
 This is an implemented development baseline, **not yet a production-ready or stable v1.0 release**.
