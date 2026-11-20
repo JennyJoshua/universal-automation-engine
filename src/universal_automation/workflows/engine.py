@@ -57,11 +57,22 @@ class WorkflowRunner:
         try:
             for step in workflow.steps:
                 self._registry.get_capability(step.plugin_id, step.capability_name)
+                if not self._executor.has_handler(step.plugin_id, step.capability_name):
+                    raise WorkflowValidationError(
+                        "Workflow references a capability without a registered handler"
+                    )
                 if step.compensation is not None:
                     self._registry.get_capability(
                         step.compensation.plugin_id,
                         step.compensation.capability_name,
                     )
+                    if not self._executor.has_handler(
+                        step.compensation.plugin_id,
+                        step.compensation.capability_name,
+                    ):
+                        raise WorkflowValidationError(
+                            "Workflow compensation has no registered handler"
+                        )
         except (PluginNotFoundError, CapabilityNotFoundError) as exc:
             raise WorkflowValidationError(
                 "Workflow references an unavailable capability"
@@ -288,10 +299,9 @@ class WorkflowRunner:
         segments = path.split(".")
         current = target
         for segment in segments[:-1]:
-            existing = current.get(segment)
-            if existing is None:
-                existing = {}
-                current[segment] = existing
+            if segment not in current:
+                current[segment] = {}
+            existing = current[segment]
             if not isinstance(existing, dict):
                 raise WorkflowInputMappingError(
                     "Mapped target path conflicts with a non-object input value"
