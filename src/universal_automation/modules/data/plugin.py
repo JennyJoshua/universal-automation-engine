@@ -348,13 +348,15 @@ class StructuredDataModule:
                 raise HandlerInputError("Worksheet was not found")
             sheet = workbook[sheet_name] if sheet_name else workbook.active
             row_limit = min(data.get("max_rows", self._max_rows), self._max_rows)
+            if sheet.max_column > self._max_columns:
+                raise HandlerInputError("Worksheet exceeds the configured column limit")
             iterator = sheet.iter_rows(
                 values_only=True,
-                max_col=self._max_columns + 1,
+                max_col=self._max_columns,
                 max_row=row_limit + 2,
             )
             first_row = next(iterator, None)
-            if not first_row or len(first_row) > self._max_columns:
+            if not first_row:
                 raise HandlerInputError("Worksheet must contain a header row within the column limit")
             headers = [str(value).strip() if value is not None else "" for value in first_row]
             if any(not value for value in headers) or len(headers) != len(set(headers)):
