@@ -68,7 +68,7 @@ def create_app(
 
     @app.get("/v1/plugins", response_model=list[PluginManifest], tags=["plugins"])
     def list_plugins(
-        _principal: ExecutionPrincipal = Depends(require_principal),  # noqa: B008  # noqa: B008
+        _principal: ExecutionPrincipal = Depends(require_principal),  # noqa: B008  # noqa: B008  # noqa: B008
     ) -> list[PluginManifest]:
         return list(plugin_registry.list_plugins())
 
