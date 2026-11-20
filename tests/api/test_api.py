@@ -10,8 +10,9 @@ from universal_automation.interfaces.api.app import create_app
 from universal_automation.interfaces.api.auth import (
     APIKeyAuthenticator,
     AuthenticationError,
+    ManagedAPIKeyAuthenticator,
 )
-from universal_automation.security import AuthorizationPolicy, ExecutionPrincipal
+from universal_automation.security import APIKeyManager, AuthorizationPolicy, ExecutionPrincipal
 
 VALID_API_KEY = "uae-test-key-" + ("x" * 32)
 
@@ -21,6 +22,7 @@ def make_client(
     permissions: set[str] | None = None,
     approval_required: bool = False,
     handler=None,
+    api_key_manager: APIKeyManager | None = None,
 ) -> TestClient:
     manifest = PluginManifest(
         plugin_id="example.text-tools",
@@ -59,6 +61,14 @@ def make_client(
         subject_id="api-user",
         permissions=permissions if permissions is not None else {"text.process"},
     )
+    if api_key_manager is not None:
+        return TestClient(
+            create_app(
+                registry,
+                executor,
+                api_key_authenticator=ManagedAPIKeyAuthenticator(api_key_manager),
+            )
+        )
     return TestClient(create_app(registry, executor, {VALID_API_KEY: principal}))
 
 
@@ -279,4 +289,52 @@ def test_app_rejects_mismatched_registry_and_executor() -> None:
             PluginRegistry(),
             executor,
             {VALID_API_KEY: ExecutionPrincipal(subject_id="api-user")},
+        )
+
+def test_managed_api_key_authenticator_protects_rest_endpoints():
+    manager = APIKeyManager()
+    issued = manager.issue(
+        "managed-api-user",
+        {"text.process"},
+        datetime.now(UTC) + timedelta(days=1),
+    )
+    client = make_client(
+        handler=lambda data: {"normalized": data["text"].strip().lower()},
+        api_key_manager=manager,
+    )
+
+    response = client.get(
+        "/v1/plugins",
+        headers={"X-API-Key": issued.api_key},
+    )
+
+    assert response.status_code == 200
+    assert response.json()[0]["plugin_id"] == "example.text-tools"
+
+
+def test_app_rejects_ambiguous_api_key_configuration():
+    manifest = PluginManifest(
+        plugin_id="example.simple",
+        display_name="Simple Plugin",
+        version="1.0.0",
+        description="Minimal API-key configuration test.",
+        capabilities=(
+            CapabilitySpec(
+                name="ping",
+                description="Return a ping result.",
+                input_schema={"type": "object", "properties": {}},
+                output_schema={"type": "object", "properties": {}},
+            ),
+        ),
+    )
+    registry = PluginRegistry()
+    registry.register(manifest)
+    executor = CapabilityExecutor(registry, AuthorizationPolicy())
+    manager = APIKeyManager()
+    with pytest.raises(ValueError, match="either api_keys or api_key_authenticator"):
+        create_app(
+            registry,
+            executor,
+            {VALID_API_KEY: ExecutionPrincipal(subject_id="legacy-user")},
+            api_key_authenticator=ManagedAPIKeyAuthenticator(manager),
         )
