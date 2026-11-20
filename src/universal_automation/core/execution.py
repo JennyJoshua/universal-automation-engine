@@ -113,6 +113,11 @@ class CapabilityExecutor:
         self._handlers: dict[tuple[str, str], _HandlerBinding] = {}
         self._lock = RLock()
 
+    @property
+    def plugin_registry(self) -> PluginRegistry:
+        """Return the registry used for capability resolution."""
+        return self._plugin_registry
+
     def register_handler(
         self,
         plugin_id: str,
