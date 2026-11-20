@@ -111,7 +111,8 @@ def test_handler_registration_requires_existing_capability() -> None:
 
 def test_identical_handler_registration_is_idempotent() -> None:
     _, executor = make_system()
-    handler = lambda data: {"normalized": data["text"]}
+    def handler(data: dict[str, Any]) -> dict[str, Any]:
+        return {"normalized": data["text"]}
 
     executor.register_handler("example.text-tools", "normalize_text", handler)
     executor.register_handler("example.text-tools", "normalize_text", handler)
@@ -119,8 +120,11 @@ def test_identical_handler_registration_is_idempotent() -> None:
 
 def test_conflicting_handler_registration_is_rejected() -> None:
     _, executor = make_system()
-    first = lambda data: {"normalized": data["text"]}
-    second = lambda data: {"normalized": data["text"].strip()}
+    def first(data: dict[str, Any]) -> dict[str, Any]:
+        return {"normalized": data["text"]}
+
+    def second(data: dict[str, Any]) -> dict[str, Any]:
+        return {"normalized": data["text"].strip()}
 
     executor.register_handler("example.text-tools", "normalize_text", first)
 
