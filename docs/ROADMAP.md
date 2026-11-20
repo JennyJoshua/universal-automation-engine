@@ -8,7 +8,7 @@ This roadmap distinguishes existing implementation from planned work. Batch comp
 
 ## Batch 1 — Repository consolidation and project governance
 
-**Status: In progress**
+**Status: Complete**
 
 - [x] Inspect the current main-branch implementation and repository history.
 - [x] Confirm the current release version and CI Python matrix.
@@ -41,7 +41,7 @@ This roadmap distinguishes existing implementation from planned work. Batch comp
 
 ## Batch 3 — Workflow orchestration
 
-**Status: Not started**
+**Status: In progress**
 
 - [ ] Define versioned workflow and step contracts.
 - [ ] Execute multiple registered capabilities in a deterministic sequence.
