@@ -62,7 +62,7 @@ policy.authorize(
 
 ## Security boundary and limitations
 
-- This package does not authenticate users or API keys.
+- APIKeyManager authenticates managed API keys into trusted principals; it does not authenticate human users or validate OAuth/JWT tokens.
 - It does not issue or persist approval grants.
 - It does not provide HTTP or MCP middleware.
 - It does not execute plugin code.
