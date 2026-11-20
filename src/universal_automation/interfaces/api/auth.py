@@ -7,6 +7,7 @@ import hmac
 from collections.abc import Mapping
 
 from universal_automation.security import ExecutionPrincipal
+from universal_automation.security.api_keys import APIKeyAuthenticationError, APIKeyManager
 
 
 class AuthenticationError(Exception):
@@ -54,3 +55,17 @@ class APIKeyAuthenticator:
             raise AuthenticationError("Invalid API key")
 
         return matched_principal.model_copy(deep=True)
+
+
+class ManagedAPIKeyAuthenticator:
+    """Authenticate keys using the managed lifecycle and its configured store."""
+
+    def __init__(self, manager: APIKeyManager) -> None:
+        self._manager = manager
+
+    def authenticate(self, api_key: str | None) -> ExecutionPrincipal:
+        """Return the trusted principal for an active, unexpired managed key."""
+        try:
+            return self._manager.authenticate(api_key)
+        except APIKeyAuthenticationError as exc:
+            raise AuthenticationError("Invalid API key") from exc
