@@ -347,7 +347,12 @@ class StructuredDataModule:
             if sheet_name is not None and sheet_name not in workbook.sheetnames:
                 raise HandlerInputError("Worksheet was not found")
             sheet = workbook[sheet_name] if sheet_name else workbook.active
-            iterator = sheet.iter_rows(values_only=True)
+            row_limit = min(data.get("max_rows", self._max_rows), self._max_rows)
+            iterator = sheet.iter_rows(
+                values_only=True,
+                max_col=self._max_columns + 1,
+                max_row=row_limit + 2,
+            )
             first_row = next(iterator, None)
             if not first_row or len(first_row) > self._max_columns:
                 raise HandlerInputError("Worksheet must contain a header row within the column limit")
@@ -356,7 +361,7 @@ class StructuredDataModule:
                 raise HandlerInputError("Worksheet headers must be non-empty and unique")
             records = []
             for row in iterator:
-                if len(records) >= min(data.get("max_rows", self._max_rows), self._max_rows):
+                if len(records) >= row_limit:
                     return {"headers": headers, "records": records, "row_count": len(records), "truncated": True}
                 values = list(row[: len(headers)])
                 values.extend([None] * (len(headers) - len(values)))
