@@ -46,16 +46,19 @@ def execute(executor, principal, capability_name, input_data):
     )
 
 
-def test_module_registers_three_document_creation_capabilities(tmp_path) -> None:
+def test_module_registers_base_and_optional_document_capabilities(tmp_path) -> None:
     module, registry, executor, _ = make_engine(tmp_path)
 
     manifest = registry.get(module.plugin_id)
 
-    assert {cap.name for cap in manifest.capabilities} == {
+    assert {
         "create_markdown_document",
         "create_text_document",
         "create_json_document",
-    }
+        "create_pdf_document",
+        "create_docx_document",
+        "create_xlsx_document",
+    } <= {cap.name for cap in manifest.capabilities}
     assert all(cap.permissions == ("documents.create",) for cap in manifest.capabilities)
     assert all(not cap.destructive and not cap.approval_required for cap in manifest.capabilities)
     assert executor.plugin_registry is registry
