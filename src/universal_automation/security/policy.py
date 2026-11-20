@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import re
 from datetime import datetime, timezone
-from typing import Any
-
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from universal_automation.core.registry import RegisteredCapability
