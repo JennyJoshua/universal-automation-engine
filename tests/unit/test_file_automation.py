@@ -244,3 +244,15 @@ def test_module_requires_existing_directory(tmp_path) -> None:
 def test_module_rejects_non_positive_limits(tmp_path) -> None:
     with pytest.raises(ValueError, match="must all be positive"):
         FileAutomationModule(tmp_path, max_scan_files=0)
+
+
+def test_search_counts_binary_bytes_against_scan_budget(tmp_path) -> None:
+    (tmp_path / "a-binary.dat").write_bytes(b"\\xff\\xfe\\x00")
+    (tmp_path / "b-text.txt").write_text("needle", encoding="utf-8")
+    _, _, executor, principal = make_engine(tmp_path, max_scan_bytes=3)
+
+    result = execute(executor, principal, "search_text_files", {"query": "needle"})
+
+    assert result.output_data["matches"] == []
+    assert result.output_data["files_scanned"] == 2
+    assert result.output_data["truncated"] is True
