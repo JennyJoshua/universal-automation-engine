@@ -3,7 +3,7 @@
 **Status date:** 2026-11-20  
 **Current release line:** 0.1.0 (pre-release)  
 **Default branch:** `main`  
-**Current baseline commit:** `38859f8487391f9df7a4a6625ef8ca037b9306ae`
+**Current baseline commit:** `e7e1855dc0a24e75e0207d6248f78b9067a88cfa`
 
 ## Executive summary
 
@@ -35,7 +35,7 @@ This is an implemented development baseline, **not yet a production-ready or sta
 | MCP adapter | Initial implementation | Local stdio and optional authenticated remote transport |
 | File automation | Initial implementation | Workspace-confined, read-only file operations |
 | Document creation | Initial implementation | New-file creation; no overwrite/update/delete |
-| Structured data module | Not implemented | Planned next capability module |
+| Structured data module | Initial implementation | Bounded CSV/JSON operations, record transforms, optional XLSX extraction |
 | Workflow orchestration | Not implemented | No multi-step workflow runtime |
 | Persistent execution history | Not implemented | No durable run store |
 | Production deployment | Not implemented | Deliberately outside the initial foundation |
