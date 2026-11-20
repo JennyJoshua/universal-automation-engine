@@ -349,3 +349,20 @@ def test_managed_authenticator_maps_invalid_key_to_generic_authentication_error(
 
     with pytest.raises(AuthenticationError, match="Invalid API key"):
         authenticator.authenticate("invalid")
+
+def test_managed_api_key_revocation_is_enforced_by_rest():
+    manager = APIKeyManager()
+    issued = manager.issue(
+        "managed-api-user",
+        {"text.process"},
+        datetime.now(UTC) + timedelta(days=1),
+    )
+    client = make_client(api_key_manager=manager)
+    assert manager.revoke(issued.key_id) is True
+
+    response = client.get(
+        "/v1/plugins",
+        headers={"X-API-Key": issued.api_key},
+    )
+
+    assert response.status_code == 401
