@@ -213,7 +213,7 @@ class MCPAdapter:
             )
         except AuthorizationError:
             return self._tool_error("Execution is not authorized")
-        except (InputValidationError,):
+        except InputValidationError:
             return self._tool_error("Input does not satisfy the declared capability schema")
         except (HandlerNotRegisteredError, PluginNotFoundError, CapabilityNotFoundError):
             return self._tool_error("Capability is unavailable")
