@@ -57,12 +57,12 @@ This roadmap distinguishes existing implementation from planned work. Batch comp
 
 ## Batch 4 — Authentication, authorization, and approval hardening
 
-**Status: Not started**
+**Status: In progress — API-key lifecycle implementation underway**
 
-- [ ] Define host-independent identity and principal lifecycle contracts.
-- [ ] Add secure API-key issuance, hashing, rotation, expiry, and revocation interfaces.
+- [x] Define host-independent identity and principal lifecycle contracts.
+- [x] Add secure API-key issuance, hashing, rotation, expiry, and revocation interfaces.
 - [ ] Keep secret material out of logs, errors, and persisted audit events.
-- [ ] Define role/permission mapping without trusting client-supplied claims.
+- [x] Define role/permission mapping without trusting client-supplied claims.
 - [ ] Implement trusted approval request, reviewer decision, expiry, and one-time binding.
 - [ ] Bind approval to principal, action, resource, and execution request.
 - [ ] Add audit events for authorization decisions and approvals.

@@ -3,7 +3,7 @@
 **Status date:** 2026-11-20  
 **Current release line:** 0.1.0 (pre-release)  
 **Default branch:** `main`  
-**Current baseline commit:** `28f2d3e1d0d2b60b346d6a111047be9928feb827`
+**Current baseline commit:** `d1ab949f18ae8fd80af19b9c741903c0f79f006b`
 
 ## Executive summary
 
@@ -20,6 +20,7 @@ The repository has completed its initial foundation and currently contains:
 - New Markdown, text, JSON, PDF, DOCX, and XLSX document creation (office/PDF formats use optional dependencies).
 - Bounded CSV/JSON reading and writing, JSON record transformations, and optional XLSX extraction.
 - Sequential workflow orchestration with versioned contracts, field mappings, conditions, per-step authorization, and compensation.
+- Managed API-key lifecycle with high-entropy issuance, SHA-256 digest storage, expiry, rotation, revocation, and REST integration.
 - Unit, API, MCP, and integration test suites.
 
 This is an implemented development baseline, **not yet a production-ready or stable v1.0 release**.
@@ -33,7 +34,7 @@ This is an implemented development baseline, **not yet a production-ready or sta
 | Registry | Implemented | Registration and discovery |
 | Capability execution | Implemented | In-process handler execution |
 | Security policy | Initial implementation | Permission checks and request-bound approval-grant validation primitives |
-| REST API | Initial implementation | API-key mapping supplied by host; no key lifecycle management |
+| REST API | Initial implementation | Managed API-key lifecycle available; default store is in-memory; static mapping retained for compatibility |
 | MCP adapter | Initial implementation | Local stdio and optional authenticated remote transport |
 | File automation | Initial implementation | Workspace-confined, read-only file operations |
 | Document creation | Initial implementation | New-file creation; no overwrite/update/delete |
@@ -45,7 +46,7 @@ This is an implemented development baseline, **not yet a production-ready or sta
 ## Known limitations and risks
 
 1. Execution is synchronous/in-process; no general sandbox or hard execution timeout is provided.
-2. REST API keys and principals are injected by the host in memory. Issuance, rotation, revocation, and persistent identity management are not implemented.
+2. Managed API-key issuance, expiry, rotation, and revocation are available, but the default store is in-memory; hosts must provide a persistent APIKeyStore for durable or multi-process deployments.
 3. Approval validation primitives exist, but there is no built-in approval request, decision, storage, or reviewer workflow.
 4. There is no persistent workflow definition or execution-history store.
 5. Third-party plugin discovery/loading and isolation are not implemented.

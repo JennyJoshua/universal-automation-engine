@@ -23,7 +23,11 @@ from universal_automation.core.registry import (
     PluginNotFoundError,
     PluginRegistry,
 )
-from universal_automation.interfaces.api.auth import APIKeyAuthenticator, AuthenticationError
+from universal_automation.interfaces.api.auth import (
+    APIKeyAuthenticator,
+    AuthenticationError,
+    ManagedAPIKeyAuthenticator,
+)
 from universal_automation.security import (
     ApprovalRequiredError,
     AuthorizationError,
@@ -36,13 +40,21 @@ from universal_automation.security import (
 def create_app(
     plugin_registry: PluginRegistry,
     executor: CapabilityExecutor,
-    api_keys: Mapping[str, ExecutionPrincipal],
+    api_keys: Mapping[str, ExecutionPrincipal] | None = None,
+    *,
+    api_key_authenticator: APIKeyAuthenticator | ManagedAPIKeyAuthenticator | None = None,
 ) -> FastAPI:
-    """Create an API app using host-provided registry, executor, and API keys."""
+    """Create an API app with a host-configured trusted API-key authenticator."""
     if executor.plugin_registry is not plugin_registry:
         raise ValueError("executor and API must use the same plugin registry instance")
-
-    authenticator = APIKeyAuthenticator(api_keys)
+    if api_key_authenticator is not None and api_keys is not None:
+        raise ValueError("Supply either api_keys or api_key_authenticator, not both")
+    if api_key_authenticator is not None:
+        authenticator = api_key_authenticator
+    elif api_keys is not None:
+        authenticator = APIKeyAuthenticator(api_keys)
+    else:
+        raise ValueError("Configure api_key_authenticator or legacy api_keys mapping")
     api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
     app = FastAPI(

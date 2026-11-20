@@ -62,7 +62,7 @@ policy.authorize(
 
 ## Security boundary and limitations
 
-- This package does not authenticate users or API keys.
+- APIKeyManager authenticates managed API keys into trusted principals; it does not authenticate human users or validate OAuth/JWT tokens.
 - It does not issue or persist approval grants.
 - It does not provide HTTP or MCP middleware.
 - It does not execute plugin code.
@@ -71,3 +71,14 @@ policy.authorize(
 - The future execution service must call this policy before invoking any handler.
 
 These primitives are an authorization gate, not a complete application security system.
+
+
+## Managed API-key lifecycle
+
+The security package now includes APIKeyManager, APIKeyStore, and InMemoryAPIKeyStore. The manager issues high-entropy keys, stores only SHA-256 digests, authenticates keys into trusted ExecutionPrincipal instances, and supports expiry, rotation, and revocation. The in-memory store is a development default; hosts can supply a persistent implementation of the APIKeyStore protocol.
+
+The REST API can use ManagedAPIKeyAuthenticator with APIKeyManager. The older static API-key mapping remains available for compatibility but has no issuance, expiry, rotation, or revocation lifecycle.
+
+## Approval lifecycle status
+
+ApprovalGrant currently binds a principal, plugin, capability, request ID, and validity window. A full reviewer workflow, resource/input-digest binding, and one-time grant consumption are still being implemented in Batch 4. Do not treat the current primitive as a complete approval-management system.

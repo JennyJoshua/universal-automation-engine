@@ -4,7 +4,7 @@
 
 The REST API exposes plugin discovery and controlled capability execution through FastAPI. It does not require a separate frontend.
 
-The application is created with `create_app(plugin_registry, executor, api_keys)`. The host application supplies the registry, executor, and API-key-to-principal mapping.
+The application is created with `create_app(plugin_registry, executor, api_key_authenticator=...)`. The host supplies the registry, executor, and a trusted authenticator. A legacy static API-key mapping remains supported for compatibility.
 
 ## Authentication
 
@@ -18,7 +18,17 @@ API keys:
 - Map to trusted server-side `ExecutionPrincipal` objects.
 - Must be supplied by the host from a secure configuration or secret store.
 
-The authenticator does not provide API-key issuance, rotation, persistence, or a management interface. Never commit API keys to source control or expose them in logs.
+The managed API-key lifecycle is available through APIKeyManager:
+
+- Keys use a high-entropy random secret and a non-secret key identifier.
+- Only a SHA-256 digest of the secret is stored.
+- Issuance requires a host-trusted subject, permissions, and timezone-aware expiry.
+- Authentication rejects unknown, tampered, expired, and revoked keys.
+- Rotation issues a replacement and revokes the previous key.
+- Revocation invalidates a key immediately.
+- The raw key is returned only by issue/rotate and must be delivered securely once.
+
+The default InMemoryAPIKeyStore is suitable for development and small single-process deployments. Hosts can implement the APIKeyStore protocol for persistent storage. The legacy static mapping remains for compatibility but does not provide lifecycle operations. Never commit API keys to source control or expose them in logs.
 
 Example request header:
 
@@ -81,34 +91,45 @@ Error responses avoid exposing internal handler exception details.
 ## Host setup example
 
 ```python
+from datetime import UTC, datetime, timedelta
+
 from fastapi import FastAPI
 
 from universal_automation.core.execution import CapabilityExecutor
 from universal_automation.core.registry import PluginRegistry
 from universal_automation.interfaces.api import create_app
-from universal_automation.security import AuthorizationPolicy, ExecutionPrincipal
+from universal_automation.interfaces.api.auth import ManagedAPIKeyAuthenticator
+from universal_automation.security import APIKeyManager, AuthorizationPolicy
 
 registry = PluginRegistry()
 # Register plugin manifests and trusted handlers during host startup.
 
 executor = CapabilityExecutor(registry, AuthorizationPolicy())
+key_manager = APIKeyManager()
 
-api_keys = {
-    "replace-with-a-random-secret-of-at-least-32-characters": ExecutionPrincipal(
-        subject_id="integration-client",
-        permissions={"files.read"},
-    )
-}
+issued = key_manager.issue(
+    subject_id="integration-client",
+    permissions={"files.read"},
+    expires_at=datetime.now(UTC) + timedelta(days=30),
+)
 
-app: FastAPI = create_app(registry, executor, api_keys)
+app: FastAPI = create_app(
+    registry,
+    executor,
+    api_key_authenticator=ManagedAPIKeyAuthenticator(key_manager),
+)
+
+# Deliver issued.api_key securely to the client once. Do not log or commit it.
+# Rotation: key_manager.rotate(issued.key_id, new_expiry)
+# Revocation: key_manager.revoke(issued.key_id)
 ```
 
-Replace the example key with a randomly generated secret supplied through secure host configuration. Do not use the example value in a real deployment.
+Deliver the issued secret through a trusted, secure channel. Do not log or commit it.
 
 ## Current limitations
 
-- API keys and principals are supplied in memory by the host.
-- No OAuth, JWT, user registration, or API-key management endpoints.
-- No persistent key store or revocation service.
+- The default managed key store is in-memory; hosts must provide a persistent APIKeyStore for multi-process or durable deployments.
+- No OAuth, JWT, user registration, or public API-key management endpoints.
+- The host is responsible for secure delivery of newly issued keys and for configuring a persistent store where required.
 - No approval workflow; approval-required capabilities are denied by default.
 - No production deployment configuration is included.
