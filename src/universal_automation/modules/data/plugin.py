@@ -352,7 +352,7 @@ class StructuredDataModule:
                 raise HandlerInputError("Worksheet exceeds the configured column limit")
             iterator = sheet.iter_rows(
                 values_only=True,
-                max_col=self._max_columns,
+                max_col=sheet.max_column,
                 max_row=row_limit + 2,
             )
             first_row = next(iterator, None)
