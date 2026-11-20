@@ -3,7 +3,7 @@
 **Status date:** 2026-11-20  
 **Current release line:** 0.1.0 (pre-release)  
 **Default branch:** `main`  
-**Current baseline commit:** `231fc4448d93ecd24c060830a2d6d8b7394a0cf6`
+**Current baseline commit:** `9d420217df9b13fd645e271783c256bac67953c2`
 
 ## Executive summary
 
@@ -19,6 +19,7 @@ The repository has completed its initial foundation and currently contains:
 - Read-only file automation.
 - New Markdown, text, JSON, PDF, DOCX, and XLSX document creation (office/PDF formats use optional dependencies).
 - Bounded CSV/JSON reading and writing, JSON record transformations, and optional XLSX extraction.
+- Sequential workflow orchestration with versioned contracts, field mappings, conditions, per-step authorization, and compensation.
 - Unit, API, MCP, and integration test suites.
 
 This is an implemented development baseline, **not yet a production-ready or stable v1.0 release**.
@@ -37,7 +38,7 @@ This is an implemented development baseline, **not yet a production-ready or sta
 | File automation | Initial implementation | Workspace-confined, read-only file operations |
 | Document creation | Initial implementation | New-file creation; no overwrite/update/delete |
 | Structured data module | Initial implementation | Bounded CSV/JSON operations, record transforms, optional XLSX extraction |
-| Workflow orchestration | Not implemented | No multi-step workflow runtime |
+| Workflow orchestration | Initial implementation | Sequential in-memory runs; no persistence, queue, parallel execution, or automatic retries |
 | Persistent execution history | Not implemented | No durable run store |
 | Production deployment | Not implemented | Deliberately outside the initial foundation |
 
@@ -58,7 +59,7 @@ This is an implemented development baseline, **not yet a production-ready or sta
 |---|---|---|
 | 1 | Repository consolidation and project governance | Complete |
 | 2 | Structured data automation | Complete |
-| 3 | Workflow orchestration | Not started |
+| 3 | Workflow orchestration | In progress |
 | 4 | Authentication, authorization, and approval hardening | Not started |
 | 5 | Execution reliability and isolation | Not started |
 | 6 | Additional automation modules | Not started |

@@ -287,3 +287,13 @@ def test_non_json_serializable_handler_output_is_rejected() -> None:
 
     with pytest.raises(OutputValidationError):
         executor.execute(make_request(), make_principal())
+
+def test_handler_availability_can_be_checked_without_invocation() -> None:
+    _, executor = make_system()
+    assert executor.has_handler("example.text-tools", "normalize_text") is False
+    executor.register_handler(
+        "example.text-tools",
+        "normalize_text",
+        lambda data: {"normalized": data["text"]},
+    )
+    assert executor.has_handler("example.text-tools", "normalize_text") is True
