@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-import errno
 import os
-from pathlib import Path, PureWindowsPath
+from pathlib import Path
 from typing import Any
 
 from universal_automation.core.contracts import CapabilitySpec, PluginManifest
 from universal_automation.core.execution import CapabilityExecutor, HandlerInputError
 from universal_automation.core.registry import PluginRegistry
+from universal_automation.modules.workspace import WorkspaceGuard
 
 
 class FileAutomationModule:
@@ -27,12 +27,8 @@ class FileAutomationModule:
         max_directory_entries: int = 1_000,
         max_scan_bytes: int = 10_485_760,
     ) -> None:
-        try:
-            root = Path(workspace_root).expanduser().resolve(strict=True)
-        except OSError as exc:
-            raise ValueError("workspace_root must be an existing directory") from exc
-        if not root.is_dir():
-            raise ValueError("workspace_root must be an existing directory")
+        self._workspace = WorkspaceGuard(workspace_root)
+        root = self._workspace.root
         if min(
             max_file_bytes,
             max_scan_files,
@@ -182,37 +178,10 @@ class FileAutomationModule:
 
     def _resolve_workspace_path(self, raw_path: str) -> Path:
         """Resolve a relative path and reject traversal, absolute paths, and symlinks."""
-        if not isinstance(raw_path, str) or not raw_path or "\x00" in raw_path:
-            raise HandlerInputError("A valid workspace-relative path is required")
-
-        relative = Path(raw_path)
-        windows_path = PureWindowsPath(raw_path)
-        if relative.is_absolute() or windows_path.is_absolute() or windows_path.drive:
-            raise HandlerInputError("Absolute paths are not allowed")
-
-        if any(part == ".." for part in relative.parts) or any(
-            part == ".." for part in windows_path.parts
-        ):
-            raise HandlerInputError("Parent-directory traversal is not allowed")
-
-        current = self._root
-        for part in relative.parts:
-            if part in ("", "."):
-                continue
-            current = current / part
-            if current.is_symlink():
-                raise HandlerInputError("Symbolic links are not supported")
-
-        resolved = current.resolve(strict=False)
-        try:
-            resolved.relative_to(self._root)
-        except ValueError as exc:
-            raise HandlerInputError("Path is outside the configured workspace") from exc
-
-        return resolved
+        return self._workspace.resolve_relative_path(raw_path)
 
     def _relative_path(self, path: Path) -> str:
-        return path.relative_to(self._root).as_posix() or "."
+        return self._workspace.relative_path(path)
 
     def _list_files(self, data: dict[str, Any]) -> dict[str, Any]:
         directory = self._resolve_workspace_path(data.get("directory", "."))
@@ -261,25 +230,10 @@ class FileAutomationModule:
 
     def _read_text_file(self, data: dict[str, Any]) -> dict[str, Any]:
         target = self._resolve_workspace_path(data["path"])
-        if not target.exists():
-            raise HandlerInputError("File was not found")
-        if not target.is_file():
-            raise HandlerInputError("The requested path is not a file")
-
-        try:
-            descriptor = os.open(
-                target,
-                os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
-            )
-            with os.fdopen(descriptor, "rb") as file_handle:
-                raw = file_handle.read(self._max_file_bytes + 1)
-        except OSError as exc:
-            if exc.errno == errno.ELOOP:
-                raise HandlerInputError("Symbolic links are not supported") from exc
-            raise
-
-        if len(raw) > self._max_file_bytes:
-            raise HandlerInputError("File exceeds the configured read-size limit")
+        raw = self._workspace.read_bytes(
+            data["path"],
+            max_bytes=self._max_file_bytes,
+        )
 
         try:
             content = raw.decode("utf-8")
@@ -346,27 +300,25 @@ class FileAutomationModule:
                     truncated = True
                     break
 
+                relative_path = self._relative_path(file_path)
                 try:
-                    descriptor = os.open(
-                        file_path,
-                        os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
+                    raw = self._workspace.read_bytes(
+                        relative_path,
+                        max_bytes=self._max_file_bytes,
                     )
-                    with os.fdopen(descriptor, "rb") as file_handle:
-                        raw = file_handle.read(self._max_file_bytes + 1)
-                    if len(raw) > self._max_file_bytes:
-                        continue
-                    if bytes_scanned + len(raw) > self._max_scan_bytes:
-                        truncated = True
-                        break
-                    bytes_scanned += len(raw)
-                    content = raw.decode("utf-8")
-                except OSError:
+                except HandlerInputError:
                     truncated = True
                     continue
+
+                if bytes_scanned + len(raw) > self._max_scan_bytes:
+                    truncated = True
+                    break
+                bytes_scanned += len(raw)
+                try:
+                    content = raw.decode("utf-8")
                 except UnicodeDecodeError:
                     continue
 
-                relative_path = self._relative_path(file_path)
 
                 for line_number, line in enumerate(content.splitlines(), start=1):
                     if query not in line.casefold():
