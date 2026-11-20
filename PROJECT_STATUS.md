@@ -19,7 +19,8 @@ The repository has completed its initial foundation and currently contains:
 - Read-only file automation.
 - New Markdown, text, JSON, PDF, DOCX, and XLSX document creation (office/PDF formats use optional dependencies).
 - Bounded CSV/JSON reading and writing, JSON record transformations, and optional XLSX extraction.
-- Sequential workflow orchestration with versioned contracts, field mappings, conditions, per-step authorization, and compensation.\n- Managed API-key lifecycle with high-entropy issuance, SHA-256 digest storage, expiry, rotation, revocation, and REST integration.
+- Sequential workflow orchestration with versioned contracts, field mappings, conditions, per-step authorization, and compensation.
+- Managed API-key lifecycle with high-entropy issuance, SHA-256 digest storage, expiry, rotation, revocation, and REST integration.
 - Unit, API, MCP, and integration test suites.
 
 This is an implemented development baseline, **not yet a production-ready or stable v1.0 release**.
