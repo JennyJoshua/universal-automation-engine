@@ -17,7 +17,7 @@ The repository has completed its initial foundation and currently contains:
 - FastAPI REST interface and an MCP adapter.
 - Shared workspace path guard.
 - Read-only file automation.
-- New Markdown, text, JSON, PDF, DOCX, and XLSX document creation (office/PDF formats use optional dependencies).
+- New Markdown, text, JSON, PDF, DOCX, and XLSX document creation (office/PDF formats use optional dependencies).\n- Bounded CSV/JSON reading and writing, JSON record transformations, and optional XLSX extraction.
 - Unit, API, MCP, and integration test suites.
 
 This is an implemented development baseline, **not yet a production-ready or stable v1.0 release**.
@@ -55,8 +55,8 @@ This is an implemented development baseline, **not yet a production-ready or sta
 
 | Batch | Scope | Status |
 |---|---|---|
-| 1 | Repository consolidation and project governance | In progress |
-| 2 | Structured data automation | Not started |
+| 1 | Repository consolidation and project governance | Complete |
+| 2 | Structured data automation | In progress |
 | 3 | Workflow orchestration | Not started |
 | 4 | Authentication, authorization, and approval hardening | Not started |
 | 5 | Execution reliability and isolation | Not started |
