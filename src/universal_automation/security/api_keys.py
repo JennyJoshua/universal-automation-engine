@@ -12,7 +12,7 @@ from typing import Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from universal_automation.security import ExecutionPrincipal
+from universal_automation.security.policy import ExecutionPrincipal
 
 _KEY_ID_PATTERN = re.compile(r"^[0-9a-f]{16}$")
 _KEY_DIGEST_PATTERN = re.compile(r"^[0-9a-f]{64}$")
@@ -120,6 +120,8 @@ class InMemoryAPIKeyStore:
             self._records[record.key_id] = record.model_copy(deep=True)
 
     def revoke(self, key_id: str, revoked_at: datetime) -> bool:
+        if revoked_at.tzinfo is None or revoked_at.utcoffset() is None:
+            raise ValueError("API key revocation time must be timezone-aware")
         with self._lock:
             record = self._records.get(key_id)
             if record is None or record.revoked_at is not None:
@@ -140,7 +142,7 @@ class APIKeyManager:
     """
 
     def __init__(self, store: APIKeyStore | None = None) -> None:
-        self._store = store or InMemoryAPIKeyStore()
+        self._store = store if store is not None else InMemoryAPIKeyStore()
 
     @property
     def store(self) -> APIKeyStore:
