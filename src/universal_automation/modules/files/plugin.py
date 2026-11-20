@@ -356,11 +356,11 @@ class FileAutomationModule:
                     if bytes_scanned + len(raw) > self._max_scan_bytes:
                         truncated = True
                         break
+                    bytes_scanned += len(raw)
                     content = raw.decode("utf-8")
                 except (OSError, UnicodeDecodeError):
                     continue
 
-                bytes_scanned += len(raw)
                 relative_path = self._relative_path(file_path)
 
                 for line_number, line in enumerate(content.splitlines(), start=1):
