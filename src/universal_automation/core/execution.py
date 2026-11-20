@@ -6,8 +6,8 @@ import json
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from time import perf_counter
 from threading import RLock
+from time import perf_counter
 from typing import Any, Callable
 
 from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
@@ -214,4 +214,6 @@ class CapabilityExecutor:
             path = tuple(str(part) for part in exc.absolute_path)
             raise error_type(path) from exc
         except (TypeError, ValueError) as exc:
+            raise error_type() from exc
+        except Exception as exc:
             raise error_type() from exc
