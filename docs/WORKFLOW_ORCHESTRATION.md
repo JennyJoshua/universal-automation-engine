@@ -103,7 +103,7 @@ Do not construct approval grants from client-supplied booleans or claims. Use th
 - Conditions and normal input mappings may reference only earlier steps.
 - Compensation mappings may reference earlier steps or their own step.
 - These backward-only references make dependency cycles impossible.
-- All referenced plugin capabilities are resolved before the first workflow side effect.
+- All referenced plugin capabilities and handlers are resolved before the first workflow side effect.
 - Each mapped input is still validated against the target capability's declared JSON Schema.
 
 ## Security and operational limitations
