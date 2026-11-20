@@ -12,13 +12,13 @@ This roadmap distinguishes existing implementation from planned work. Batch comp
 
 - [x] Inspect the current main-branch implementation and repository history.
 - [x] Confirm the current release version and CI Python matrix.
-- [ ] Replace the outdated README project-status description.
-- [ ] Establish an authoritative project status document.
-- [ ] Establish this implementation roadmap and explicit v1.0 exit criteria.
-- [ ] Document branch/PR/release workflow and branch-retention policy.
-- [ ] Review stale branches and historical PRs; do not delete branches without a clear reason.
-- [ ] Validate repository documentation links and examples.
-- [ ] Review latest CI runs and record any baseline issues.
+- [x] Replace the outdated README project-status description.
+- [x] Establish an authoritative project status document.
+- [x] Establish this implementation roadmap and explicit v1.0 exit criteria.
+- [x] Document branch/PR/release workflow and branch-retention policy.
+- [x] Review stale branches and historical PRs; retain merged feature branches as historical references.
+- [x] Validate README internal documentation links against the current repository tree.
+- [x] Review latest baseline CI runs; latest main run passed for the configured matrix.
 
 **Exit criteria:** The repository accurately describes what exists, what is missing, how changes are delivered, and what constitutes v1.0.
 
