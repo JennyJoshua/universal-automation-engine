@@ -14,7 +14,8 @@ A modular, API-first Python automation engine that exposes reusable automation c
 - Workspace-confined, read-only file automation.
 - New Markdown, text, JSON, PDF, DOCX, and XLSX document creation.
 - Bounded CSV/JSON data operations, record transformations, and optional XLSX extraction.
-- Sequential, validated workflows with explicit mappings, conditions, authorization, and compensation.\n- Managed API-key issuance, hashed storage, expiry, rotation, revocation, and REST authentication.
+- Sequential, validated workflows with explicit mappings, conditions, authorization, and compensation.
+- Managed API-key issuance, hashed storage, expiry, rotation, revocation, and REST authentication.
 - Automated tests and CI for Python 3.12 and 3.13.
 
 See [Project Status](PROJECT_STATUS.md) for the verified implementation snapshot and known limitations.
