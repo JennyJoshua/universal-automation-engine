@@ -41,7 +41,7 @@ This roadmap distinguishes existing implementation from planned work. Batch comp
 
 ## Batch 3 — Workflow orchestration
 
-**Status: Implemented; PR #24 awaiting merge**
+**Status: Complete**
 
 - [x] Define versioned workflow and step contracts.
 - [x] Execute multiple registered capabilities in a deterministic sequence.
