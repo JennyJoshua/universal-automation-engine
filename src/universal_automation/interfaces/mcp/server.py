@@ -56,9 +56,14 @@ class MCPAuthenticationError(MCPAdapterError):
 
 def principal_from_access_token(token: AccessToken) -> ExecutionPrincipal:
     """Map verified OAuth token subject and scopes into execution permissions."""
-    subject_id = token.subject or token.client_id
-    if not subject_id:
+    identity = token.subject or token.client_id
+    if not identity:
         raise MCPAuthenticationError("Verified access token has no subject or client ID")
+
+    issuer = (token.claims or {}).get("iss")
+    subject_id = f"{issuer}:{identity}" if issuer else identity
+    if len(subject_id) > 200:
+        subject_id = "oauth:" + hashlib.sha256(subject_id.encode("utf-8")).hexdigest()
 
     return ExecutionPrincipal(
         subject_id=subject_id,
