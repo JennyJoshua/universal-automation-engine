@@ -1,7 +1,7 @@
 """Tests for the authenticated REST API."""
 
-from fastapi.testclient import TestClient
 import pytest
+from fastapi.testclient import TestClient
 
 from universal_automation.core.contracts import CapabilitySpec, PluginManifest
 from universal_automation.core.execution import CapabilityExecutor
@@ -57,7 +57,7 @@ def make_client(
 
     principal = ExecutionPrincipal(
         subject_id="api-user",
-        permissions=permissions or {"text.process"},
+        permissions=permissions if permissions is not None else {"text.process"},
     )
     return TestClient(create_app(registry, executor, {VALID_API_KEY: principal}))
 
