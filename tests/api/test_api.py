@@ -255,12 +255,28 @@ def test_authenticator_rejects_unknown_key() -> None:
 
 
 def test_app_rejects_mismatched_registry_and_executor() -> None:
-    _, executor = make_client_system()
-    other_registry = PluginRegistry()
+    registry = PluginRegistry()
+    registry.register(
+        PluginManifest(
+            plugin_id="example.simple",
+            display_name="Simple Plugin",
+            version="1.0.0",
+            description="Minimal registry consistency test.",
+            capabilities=(
+                CapabilitySpec(
+                    name="ping",
+                    description="Return a ping result.",
+                    input_schema={"type": "object", "properties": {}},
+                    output_schema={"type": "object", "properties": {}},
+                ),
+            ),
+        )
+    )
+    executor = CapabilityExecutor(registry, AuthorizationPolicy())
 
     with pytest.raises(ValueError, match="same plugin registry"):
         create_app(
-            other_registry,
+            PluginRegistry(),
             executor,
             {VALID_API_KEY: ExecutionPrincipal(subject_id="api-user")},
         )
