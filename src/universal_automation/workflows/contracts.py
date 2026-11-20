@@ -79,6 +79,7 @@ class WorkflowCompensation(WorkflowContractModel):
 class WorkflowStep(WorkflowContractModel):
     """One ordered capability invocation in a workflow."""
 
+    contract_version: Literal["1.0"] = "1.0"
     step_id: str = Field(min_length=1, max_length=64)
     plugin_id: str = Field(min_length=1, max_length=100)
     capability_name: str = Field(min_length=1, max_length=64)
@@ -91,8 +92,23 @@ class WorkflowStep(WorkflowContractModel):
     @classmethod
     def validate_step_id(cls, value: str) -> str:
         if not _STEP_ID.fullmatch(value):
-            raise ValueError("Step IDs must start with a lowercase letter and use lowercase letters, digits, or hyphens")
+            raise ValueError(
+                "Step IDs must start with a lowercase letter and use lowercase letters, digits, or hyphens"
+            )
         return value
+
+    @model_validator(mode="after")
+    def require_unique_mapping_targets(self) -> WorkflowStep:
+        targets = [mapping.target_path for mapping in self.mappings]
+        if len(targets) != len(set(targets)):
+            raise ValueError("Step input mapping target paths must be unique")
+        if self.compensation is not None:
+            compensation_targets = [
+                mapping.target_path for mapping in self.compensation.mappings
+            ]
+            if len(compensation_targets) != len(set(compensation_targets)):
+                raise ValueError("Compensation mapping target paths must be unique")
+        return self
 
 
 class WorkflowDefinition(WorkflowContractModel):
