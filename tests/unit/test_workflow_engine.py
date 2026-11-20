@@ -534,6 +534,43 @@ def test_mapped_target_conflict_fails_before_next_handler():
     assert [call[0] for call in calls] == ["create_order"]
 
 
+
+def test_preflight_rejects_declared_capability_without_handler():
+    registry = PluginRegistry()
+    manifest = PluginManifest(
+        plugin_id="example.unbound",
+        display_name="Unbound Capability",
+        version="1.0.0",
+        description="A declared capability with no handler.",
+        capabilities=(
+            CapabilitySpec(
+                name="do_work",
+                description="Do work.",
+                input_schema=schema({}),
+                output_schema=schema({"ok": {"type": "boolean"}}, ["ok"]),
+            ),
+        ),
+    )
+    registry.register(manifest)
+    executor = CapabilityExecutor(registry, AuthorizationPolicy())
+    runner = WorkflowRunner(executor)
+    workflow = WorkflowDefinition(
+        workflow_id="preflight.check",
+        version="1.0.0",
+        description="Ensure all handlers are bound before execution.",
+        steps=(
+            WorkflowStep(
+                step_id="work",
+                plugin_id="example.unbound",
+                capability_name="do_work",
+            ),
+        ),
+    )
+
+    with pytest.raises(WorkflowValidationError, match="without a registered handler"):
+        runner.validate(workflow)
+
+
 def test_run_id_length_is_bounded():
     runner, principal, _ = make_system()
     workflow = make_workflow([create_step()])
