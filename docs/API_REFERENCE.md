@@ -91,15 +91,15 @@ Error responses avoid exposing internal handler exception details.
 ## Host setup example
 
 ```python
+from datetime import UTC, datetime, timedelta
+
 from fastapi import FastAPI
 
 from universal_automation.core.execution import CapabilityExecutor
 from universal_automation.core.registry import PluginRegistry
 from universal_automation.interfaces.api import create_app
-from datetime import UTC, datetime, timedelta
-
-from universal_automation.security import APIKeyManager, AuthorizationPolicy
 from universal_automation.interfaces.api.auth import ManagedAPIKeyAuthenticator
+from universal_automation.security import APIKeyManager, AuthorizationPolicy
 
 registry = PluginRegistry()
 # Register plugin manifests and trusted handlers during host startup.
@@ -124,7 +124,7 @@ app: FastAPI = create_app(
 # Revocation: key_manager.revoke(issued.key_id)
 ```
 
-Replace the example key with a randomly generated secret supplied through secure host configuration. Do not use the example value in a real deployment.
+Deliver the issued secret through a trusted, secure channel. Do not log or commit it.
 
 ## Current limitations
 
