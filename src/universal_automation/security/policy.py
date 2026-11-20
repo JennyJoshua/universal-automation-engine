@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from universal_automation.core.registry import RegisteredCapability
@@ -138,7 +138,7 @@ class AuthorizationPolicy:
         if not isinstance(approval, ApprovalGrant):
             raise TypeError("approval must be a trusted ApprovalGrant")
 
-        current_time = now or datetime.now(timezone.utc)
+        current_time = now or datetime.now(UTC)
         if current_time.tzinfo is None or current_time.utcoffset() is None:
             raise ValueError("Authorization time must be timezone-aware")
 
