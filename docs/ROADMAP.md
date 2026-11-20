@@ -24,7 +24,7 @@ This roadmap distinguishes existing implementation from planned work. Batch comp
 
 ## Batch 2 — Structured data automation
 
-**Status: Implemented; PR #21 awaiting merge**
+**Status: Complete**
 
 - [x] Define a data plugin contract and capability schemas.
 - [x] Add safe CSV reading and writing.
