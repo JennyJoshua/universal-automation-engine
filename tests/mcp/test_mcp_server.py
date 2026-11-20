@@ -281,3 +281,23 @@ def test_verified_access_token_maps_to_trusted_principal() -> None:
 
     assert principal.subject_id == "mcp-user"
     assert principal.permissions == frozenset({"files.read", "text.process"})
+
+
+def test_oauth_protected_streamable_http_app_can_be_created() -> None:
+    registry = PluginRegistry()
+    executor = CapabilityExecutor(registry, AuthorizationPolicy())
+    adapter = MCPAdapter(
+        registry,
+        executor,
+        token_verifier=StaticTokenVerifier(),
+        auth_settings=AuthSettings(
+            issuer_url=AnyHttpUrl("https://auth.example.com"),
+            resource_server_url=AnyHttpUrl("http://127.0.0.1:8000/mcp"),
+            required_scopes=[],
+            validate_token_resource=True,
+        ),
+    )
+
+    app = adapter.streamable_http_app(host="127.0.0.1")
+
+    assert app is not None
