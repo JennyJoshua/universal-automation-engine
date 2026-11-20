@@ -27,7 +27,10 @@ class FileAutomationModule:
         max_directory_entries: int = 1_000,
         max_scan_bytes: int = 10_485_760,
     ) -> None:
-        root = Path(workspace_root).expanduser().resolve(strict=True)
+        try:
+            root = Path(workspace_root).expanduser().resolve(strict=True)
+        except OSError as exc:
+            raise ValueError("workspace_root must be an existing directory") from exc
         if not root.is_dir():
             raise ValueError("workspace_root must be an existing directory")
         if min(
