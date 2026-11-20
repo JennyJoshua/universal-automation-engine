@@ -18,7 +18,7 @@ The repository has completed its initial foundation and currently contains:
 - Shared workspace path guard.
 - Read-only file automation.
 - New Markdown, text, JSON, PDF, DOCX, and XLSX document creation (office/PDF formats use optional dependencies).
-- Bounded CSV/JSON reading and writing, JSON record transformations, and optional XLSX extraction.
+- Bounded CSV/JSON reading and writing, JSON record transformations, and optional XLSX extraction.\n- Sequential workflow orchestration with versioned contracts, field mappings, conditions, per-step authorization, and compensation.
 - Unit, API, MCP, and integration test suites.
 
 This is an implemented development baseline, **not yet a production-ready or stable v1.0 release**.
@@ -37,7 +37,7 @@ This is an implemented development baseline, **not yet a production-ready or sta
 | File automation | Initial implementation | Workspace-confined, read-only file operations |
 | Document creation | Initial implementation | New-file creation; no overwrite/update/delete |
 | Structured data module | Initial implementation | Bounded CSV/JSON operations, record transforms, optional XLSX extraction |
-| Workflow orchestration | Not implemented | No multi-step workflow runtime |
+| Workflow orchestration | Initial implementation | Sequential in-memory runs; no persistence, queue, parallel execution, or automatic retries |
 | Persistent execution history | Not implemented | No durable run store |
 | Production deployment | Not implemented | Deliberately outside the initial foundation |
 
