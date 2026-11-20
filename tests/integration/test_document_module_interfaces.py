@@ -41,7 +41,7 @@ def test_documents_are_discoverable_and_creatable_via_rest_and_mcp(tmp_path) -> 
         item for item in capabilities.json()
         if item["plugin_id"] == "uae.document-tools"
     ]
-    assert len(document_capabilities) == 3
+    assert len(document_capabilities) == 6
 
     rest_result = rest.post(
         "/v1/executions",
