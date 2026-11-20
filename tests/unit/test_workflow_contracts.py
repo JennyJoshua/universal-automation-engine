@@ -181,3 +181,30 @@ def test_invalid_workflow_versions_are_rejected(version):
             description="Invalid version.",
             steps=(step("create"),),
         )
+
+def test_duplicate_mapping_targets_are_rejected():
+    with pytest.raises(ValidationError, match="target paths must be unique"):
+        workflow(
+            (
+                step("create"),
+                step(
+                    "notify",
+                    mappings=(
+                        WorkflowInputMapping(
+                            source_step_id="create",
+                            source_path="order_id",
+                            target_path="order_id",
+                        ),
+                        WorkflowInputMapping(
+                            source_step_id="create",
+                            source_path="notify",
+                            target_path="order_id",
+                        ),
+                    ),
+                ),
+            )
+        )
+
+
+def test_step_contract_version_is_explicit():
+    assert step("create").contract_version == "1.0"
