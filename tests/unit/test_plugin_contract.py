@@ -50,7 +50,7 @@ def test_valid_manifest_is_accepted() -> None:
     assert manifest.capabilities[0].name == "organize_files"
 
 
-@pytest.mark.parametrize("version", ["1", "1.2", "v1.2.3", "01.2.3", "1.2.3-"])
+@pytest.mark.parametrize("version", ["1", "1.2", "v1.2.3", "01.2.3", "1.2.3-", "1.2.3-01"])
 def test_invalid_semantic_versions_are_rejected(version: str) -> None:
     with pytest.raises(ValidationError, match="semantic versioning"):
         make_manifest(version=version)
@@ -100,8 +100,14 @@ def test_destructive_capability_with_approval_is_accepted() -> None:
     assert capability.approval_required is True
 
 
-def test_models_are_immutable() -> None:
+def test_model_fields_cannot_be_reassigned() -> None:
     manifest = make_manifest()
 
     with pytest.raises(ValidationError):
         manifest.version = "2.0.0"  # type: ignore[misc]
+
+
+def test_semantic_prerelease_and_build_versions_are_accepted() -> None:
+    manifest = make_manifest(version="2.1.0-rc.1+build.7")
+
+    assert manifest.version == "2.1.0-rc.1+build.7"
