@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+from datetime import datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -183,7 +184,7 @@ class WorkflowEvent(WorkflowContractModel):
     """A bounded lifecycle event returned with an in-memory workflow run."""
 
     event_type: WorkflowEventType
-    occurred_at: Any
+    occurred_at: datetime
     step_id: str | None = None
 
 
@@ -206,6 +207,6 @@ class WorkflowExecutionResult(WorkflowContractModel):
     status: WorkflowRunStatus
     step_results: tuple[WorkflowStepResult, ...]
     events: tuple[WorkflowEvent, ...]
-    started_at: Any
-    completed_at: Any
+    started_at: datetime
+    completed_at: datetime
     duration_ms: float = Field(ge=0)
