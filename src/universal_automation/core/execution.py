@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from threading import RLock
 from time import perf_counter
-from collections.abc import Callable
 from typing import Any
 
 from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
