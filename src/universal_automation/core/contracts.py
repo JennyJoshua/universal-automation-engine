@@ -33,7 +33,8 @@ def _reject_remote_schema_references(value: Any, *, field_name: str) -> None:
             reference = value.get(reference_key)
             if isinstance(reference, str) and not reference.startswith("#"):
                 raise ValueError(
-                    f"{field_name} uses a remote schema reference; only local references are supported"
+                    f"{field_name} uses a remote schema reference; "
+                    "only local references are supported"
                 )
         for nested_value in value.values():
             _reject_remote_schema_references(nested_value, field_name=field_name)
