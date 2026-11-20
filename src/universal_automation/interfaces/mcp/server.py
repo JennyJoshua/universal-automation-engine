@@ -38,7 +38,6 @@ from universal_automation.security import (
     ExecutionPrincipal,
 )
 
-
 PrincipalResolver = Callable[[AccessToken], ExecutionPrincipal]
 ApprovalProvider = Callable[
     [AccessToken | None, str, RegisteredCapability],
