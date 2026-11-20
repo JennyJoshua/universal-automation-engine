@@ -36,6 +36,7 @@ def test_issue_stores_only_a_digest_and_returns_a_high_entropy_key():
     assert record is not None
     assert record.key_digest not in issued.api_key
     assert issued.api_key not in repr(record)
+    assert issued.api_key not in repr(issued)
     assert record.subject_id == "staff-user-1"
     assert record.permissions == {"files.read", "reports.create"}
 
@@ -49,7 +50,10 @@ def test_authentication_returns_a_trusted_principal():
     assert principal.permissions == {"files.read", "reports.create"}
 
 
-@pytest.mark.parametrize("candidate", [None, "", "malformed", "uae_1234.bad"])
+@pytest.mark.parametrize(
+    "candidate",
+    [None, "", "malformed", "uae_1234.bad", "uae_" + "a" * 16 + "." + "x" * 200],
+)
 def test_malformed_keys_fail_closed(candidate):
     manager, _ = issue()
 
