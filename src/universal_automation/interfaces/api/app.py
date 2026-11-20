@@ -65,14 +65,14 @@ def create_app(
 
     @app.get("/v1/plugins", response_model=list[PluginManifest], tags=["plugins"])
     def list_plugins(
-        _principal: ExecutionPrincipal = Depends(require_principal),
+        _principal: ExecutionPrincipal = Depends(require_principal),  # noqa: B008  # noqa: B008
     ) -> list[PluginManifest]:
         return list(plugin_registry.list_plugins())
 
     @app.get("/v1/plugins/{plugin_id}", response_model=PluginManifest, tags=["plugins"])
     def get_plugin(
         plugin_id: str,
-        _principal: ExecutionPrincipal = Depends(require_principal),
+        _principal: ExecutionPrincipal = Depends(require_principal),  # noqa: B008
     ) -> PluginManifest:
         try:
             return plugin_registry.get(plugin_id)
@@ -81,7 +81,7 @@ def create_app(
 
     @app.get("/v1/capabilities", tags=["capabilities"])
     def list_capabilities(
-        _principal: ExecutionPrincipal = Depends(require_principal),
+        _principal: ExecutionPrincipal = Depends(require_principal),  # noqa: B008
     ) -> list[dict[str, object]]:
         return [
             {
@@ -99,7 +99,7 @@ def create_app(
     def get_capability(
         plugin_id: str,
         capability_name: str,
-        _principal: ExecutionPrincipal = Depends(require_principal),
+        _principal: ExecutionPrincipal = Depends(require_principal),  # noqa: B008
     ) -> dict[str, object]:
         try:
             item = plugin_registry.get_capability(plugin_id, capability_name)
@@ -133,7 +133,10 @@ def create_app(
                 detail={"message": str(exc), "path": list(exc.path)},
             ) from exc
         except HandlerNotRegisteredError as exc:
-            raise HTTPException(status_code=409, detail="Capability handler is unavailable") from exc
+            raise HTTPException(
+                status_code=409,
+                detail="Capability handler is unavailable",
+            ) from exc
         except (HandlerExecutionError, OutputValidationError) as exc:
             raise HTTPException(status_code=500, detail="Capability execution failed") from exc
         except AuthorizationError as exc:
