@@ -13,6 +13,7 @@ from universal_automation.core.execution import (
     ExecutionRequest,
     ExecutionResult,
     HandlerExecutionError,
+    HandlerInputError,
     HandlerNotRegisteredError,
     InputValidationError,
     OutputValidationError,
@@ -135,6 +136,8 @@ def create_app(
                 status_code=422,
                 detail={"message": str(exc), "path": list(exc.path)},
             ) from exc
+        except HandlerInputError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
         except HandlerNotRegisteredError as exc:
             raise HTTPException(
                 status_code=409,
