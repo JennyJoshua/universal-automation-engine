@@ -7,6 +7,7 @@ import importlib.util
 import io
 import json
 import zipfile
+from io import BytesIO
 from pathlib import Path
 from typing import Any
 
@@ -224,7 +225,10 @@ class StructuredDataModule:
             plugin_id=self.plugin_id,
             display_name="Structured Data Tools",
             version="0.1.0",
-            description="Bounded CSV, JSON, and optional XLSX data operations in a configured workspace.",
+            description=(
+                "Bounded CSV, JSON, and optional XLSX data operations "
+                "in a configured workspace."
+            ),
             capabilities=tuple(capabilities),
         )
 
@@ -241,7 +245,9 @@ class StructuredDataModule:
         if len(encoded) > self._max_file_bytes:
             raise HandlerInputError("Structured-data input exceeds the configured size limit")
 
-    def _create_file(self, path: str, extension: str, content: bytes, row_count: int) -> dict[str, Any]:
+    def _create_file(
+        self, path: str, extension: str, content: bytes, row_count: int
+    ) -> dict[str, Any]:
         if Path(path).suffix.casefold() != extension:
             raise HandlerInputError(f"Output path must use the {extension} extension")
         created = self._workspace.create_new_file(path, content, max_bytes=self._max_output_bytes)
@@ -259,7 +265,9 @@ class StructuredDataModule:
             reader = csv.DictReader(io.StringIO(text, newline=""), strict=True)
             headers = reader.fieldnames
             if not headers or len(headers) > self._max_columns:
-                raise HandlerInputError("CSV must contain between 1 and the configured maximum columns")
+                raise HandlerInputError(
+                    "CSV must contain between 1 and the configured maximum columns"
+                )
             if any(not header or not header.strip() for header in headers):
                 raise HandlerInputError("CSV headers cannot be empty")
             if len(headers) != len(set(headers)):
@@ -272,11 +280,21 @@ class StructuredDataModule:
                 if any(value is None for value in row.values()):
                     raise HandlerInputError("CSV row contains fewer values than its header")
                 if len(records) >= limit:
-                    return {"headers": headers, "records": records, "row_count": len(records), "truncated": True}
+                    return {
+                        "headers": headers,
+                        "records": records,
+                        "row_count": len(records),
+                        "truncated": True,
+                    }
                 records.append(row)
         except (UnicodeDecodeError, csv.Error) as exc:
             raise HandlerInputError("CSV file is invalid or is not UTF-8 text") from exc
-        return {"headers": headers, "records": records, "row_count": len(records), "truncated": False}
+        return {
+            "headers": headers,
+            "records": records,
+            "row_count": len(records),
+            "truncated": False,
+        }
 
     @staticmethod
     def _safe_csv_cell(value: Any) -> str | int | float | bool:
@@ -322,7 +340,9 @@ class StructuredDataModule:
     def _write_json(self, data: dict[str, Any]) -> dict[str, Any]:
         self._validate_payload_size(data["data"])
         try:
-            encoded = (json.dumps(data["data"], ensure_ascii=False, indent=2, allow_nan=False) + "\n").encode("utf-8")
+            encoded = (
+                json.dumps(data["data"], ensure_ascii=False, indent=2, allow_nan=False) + "\n"
+            ).encode("utf-8")
         except (TypeError, ValueError, UnicodeEncodeError) as exc:
             raise HandlerInputError("Data must be valid JSON") from exc
         return self._create_file(data["path"], ".json", encoded, 0)
@@ -335,29 +355,43 @@ class StructuredDataModule:
             raise HandlerInputError("Every record must be a JSON object")
         if not isinstance(filters, dict):
             raise HandlerInputError("Filters must be an object")
-        selected = [record for record in records if all(record.get(key) == value for key, value in filters.items())]
+        selected = [
+            record
+            for record in records
+            if all(record.get(key) == value for key, value in filters.items())
+        ]
         sort_by = data.get("sort_by")
         if sort_by:
             try:
-                selected.sort(key=lambda record: (record.get(sort_by) is None, record.get(sort_by)), reverse=data.get("descending", False))
+                selected.sort(
+                    key=lambda record: (record.get(sort_by) is None, record.get(sort_by)),
+                    reverse=data.get("descending", False),
+                )
             except TypeError as exc:
                 raise HandlerInputError("Selected sort values must have compatible types") from exc
         columns = data.get("columns")
         if columns is not None:
-            selected = [{key: record[key] for key in columns if key in record} for record in selected]
+            selected = [
+                {key: record[key] for key in columns if key in record}
+                for record in selected
+            ]
         selected = selected[: data.get("limit", self._max_rows)]
         return {"records": selected, "row_count": len(selected)}
 
     def _read_spreadsheet(self, data: dict[str, Any]) -> dict[str, Any]:
-        from io import BytesIO
         from openpyxl import load_workbook
 
         raw = self._read_bytes(data["path"], ".xlsx")
         try:
             with zipfile.ZipFile(BytesIO(raw)) as archive:
                 entries = archive.infolist()
-                if len(entries) > 1_000 or sum(item.file_size for item in entries) > self._max_file_bytes * 20:
-                    raise HandlerInputError("Spreadsheet expands beyond the configured safety limit")
+                if (
+                    len(entries) > 1_000
+                    or sum(item.file_size for item in entries) > self._max_file_bytes * 20
+                ):
+                    raise HandlerInputError(
+                        "Spreadsheet expands beyond the configured safety limit"
+                    )
             workbook = load_workbook(BytesIO(raw), read_only=True, data_only=True)
             sheet_name = data.get("sheet_name")
             if sheet_name is not None and sheet_name not in workbook.sheetnames:
@@ -373,7 +407,9 @@ class StructuredDataModule:
             )
             first_row = next(iterator, None)
             if not first_row:
-                raise HandlerInputError("Worksheet must contain a header row within the column limit")
+                raise HandlerInputError(
+                    "Worksheet must contain a header row within the column limit"
+                )
             headers = [str(value).strip() if value is not None else "" for value in first_row]
             if any(not value for value in headers) or len(headers) != len(set(headers)):
                 raise HandlerInputError("Worksheet headers must be non-empty and unique")
