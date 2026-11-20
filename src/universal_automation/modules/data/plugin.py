@@ -75,6 +75,12 @@ class StructuredDataModule:
             "required": ["path"],
             "additionalProperties": False,
         }
+        json_file_input = {
+            "type": "object",
+            "properties": {"path": {"type": "string", "minLength": 1, "maxLength": 500}},
+            "required": ["path"],
+            "additionalProperties": False,
+        }
         output_schema = {
             "type": "object",
             "properties": {
@@ -170,7 +176,7 @@ class StructuredDataModule:
             CapabilitySpec(
                 name="read_json",
                 description="Parse a bounded JSON file and return its data value.",
-                input_schema=file_input,
+                input_schema=json_file_input,
                 output_schema={
                     "type": "object",
                     "properties": {"data": {}},
