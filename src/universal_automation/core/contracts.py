@@ -26,6 +26,22 @@ class ContractModel(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, str_strip_whitespace=True)
 
 
+def _reject_remote_schema_references(value: Any, *, field_name: str) -> None:
+    """Reject remote JSON Schema references so validation never performs network retrieval."""
+    if isinstance(value, dict):
+        for reference_key in ("$ref", "$dynamicRef", "$recursiveRef"):
+            reference = value.get(reference_key)
+            if isinstance(reference, str) and not reference.startswith("#"):
+                raise ValueError(
+                    f"{field_name} uses a remote schema reference; only local references are supported"
+                )
+        for nested_value in value.values():
+            _reject_remote_schema_references(nested_value, field_name=field_name)
+    elif isinstance(value, list):
+        for nested_value in value:
+            _reject_remote_schema_references(nested_value, field_name=field_name)
+
+
 def _validate_object_schema(schema: dict[str, Any], *, field_name: str) -> None:
     """Validate a JSON Schema document and require an object at its root."""
     if not isinstance(schema, dict):
@@ -33,6 +49,8 @@ def _validate_object_schema(schema: dict[str, Any], *, field_name: str) -> None:
 
     if schema.get("type") != "object":
         raise ValueError(f"{field_name} must declare type='object' at its root")
+
+    _reject_remote_schema_references(schema, field_name=field_name)
 
     try:
         validator = validator_for(schema)
