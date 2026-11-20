@@ -178,7 +178,7 @@ class MCPAdapter:
 
     async def _call_tool(
         self,
-        ctx: ServerRequestContext[Any, Any],
+        ctx: ServerRequestContext[Any],
         params: types.CallToolRequestParams,
     ) -> types.CallToolResult:
         registered = self._tool_index().get(params.name)
