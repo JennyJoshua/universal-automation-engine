@@ -340,3 +340,12 @@ def test_app_rejects_ambiguous_api_key_configuration():
             {VALID_API_KEY: ExecutionPrincipal(subject_id="legacy-user")},
             api_key_authenticator=ManagedAPIKeyAuthenticator(manager),
         )
+
+def test_managed_authenticator_maps_invalid_key_to_generic_authentication_error():
+    from universal_automation.interfaces.api.auth import AuthenticationError
+
+    manager = APIKeyManager()
+    authenticator = ManagedAPIKeyAuthenticator(manager)
+
+    with pytest.raises(AuthenticationError, match="Invalid API key"):
+        authenticator.authenticate("invalid")
