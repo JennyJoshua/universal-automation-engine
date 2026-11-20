@@ -368,7 +368,7 @@ class StructuredDataModule:
             iterator = sheet.iter_rows(
                 values_only=True,
                 max_col=sheet.max_column,
-                max_row=min(sheet.max_row, row_limit + 2),
+                max_row=min(sheet.max_row or row_limit + 2, row_limit + 2),
             )
             first_row = next(iterator, None)
             if not first_row:
