@@ -8,7 +8,6 @@ version = "0.1.0"
 description = "A modular, API-first engine for reusable automation capabilities."
 readme = "README.md"
 requires-python = ">=3.12"
-license = { text = "Apache-2.0" }
 authors = [{ name = "Universal Automation Engine contributors" }]
 dependencies = [
   "fastapi>=0.115,<1.0",
