@@ -23,7 +23,11 @@ from universal_automation.core.registry import (
     PluginNotFoundError,
     PluginRegistry,
 )
-from universal_automation.interfaces.api.auth import (\n    APIKeyAuthenticator,\n    AuthenticationError,\n    ManagedAPIKeyAuthenticator,\n)
+from universal_automation.interfaces.api.auth import (
+    APIKeyAuthenticator,
+    AuthenticationError,
+    ManagedAPIKeyAuthenticator,
+)
 from universal_automation.security import (
     ApprovalRequiredError,
     AuthorizationError,
