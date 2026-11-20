@@ -25,6 +25,11 @@ dev = [
 mcp = [
   "mcp>=2.0,<3.0",
 ]
+documents = [
+  "reportlab>=4.2,<5.0",
+  "python-docx>=1.1,<2.0",
+  "openpyxl>=3.1,<4.0",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/universal_automation"]
