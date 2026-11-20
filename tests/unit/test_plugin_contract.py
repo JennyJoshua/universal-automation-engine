@@ -111,3 +111,13 @@ def test_semantic_prerelease_and_build_versions_are_accepted() -> None:
     manifest = make_manifest(version="2.1.0-rc.1+build.7")
 
     assert manifest.version == "2.1.0-rc.1+build.7"
+
+
+def test_remote_json_schema_references_are_rejected() -> None:
+    with pytest.raises(ValidationError, match="remote schema reference"):
+        make_capability(
+            input_schema={
+                "type": "object",
+                "properties": {"external": {"$ref": "https://example.com/schema.json"}},
+            }
+        )
