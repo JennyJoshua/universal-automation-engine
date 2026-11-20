@@ -14,7 +14,7 @@ from universal_automation.core.execution import (
     InputValidationError,
     OutputValidationError,
 )
-from universal_automation.core.registry import PluginRegistry
+from universal_automation.core.registry import PluginNotFoundError, PluginRegistry
 from universal_automation.security import (
     ApprovalGrant,
     ApprovalRequiredError,
@@ -105,7 +105,7 @@ def test_register_and_execute_handler() -> None:
 def test_handler_registration_requires_existing_capability() -> None:
     _, executor = make_system()
 
-    with pytest.raises(Exception):
+    with pytest.raises(PluginNotFoundError):
         executor.register_handler("missing.plugin", "missing_action", lambda data: data)
 
 
