@@ -20,7 +20,7 @@ _PERMISSION_PATTERN = re.compile(r"^[a-z][a-z0-9]*(?:[._:-][a-z0-9]+)*$")
 
 
 class ContractModel(BaseModel):
-    """Base model that rejects undeclared fields and prevents mutation."""
+    """Base model that rejects undeclared fields and field reassignment."""
 
     model_config = ConfigDict(extra="forbid", frozen=True, str_strip_whitespace=True)
 
