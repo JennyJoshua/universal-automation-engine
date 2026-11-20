@@ -9,7 +9,11 @@ from universal_automation.core.execution import (
 )
 from universal_automation.core.registry import PluginRegistry
 from universal_automation.modules.files import FileAutomationModule
-from universal_automation.security import AuthorizationPolicy, ExecutionPrincipal
+from universal_automation.security import (
+    AuthorizationPolicy,
+    ExecutionPrincipal,
+    InsufficientPermissionsError,
+)
 
 
 def make_engine(workspace, **limits):
@@ -228,7 +232,7 @@ def test_file_tools_require_files_read_permission(tmp_path) -> None:
     _, _, executor, _ = make_engine(tmp_path)
     unprivileged = ExecutionPrincipal(subject_id="unprivileged-user")
 
-    with pytest.raises(Exception):
+    with pytest.raises(InsufficientPermissionsError):
         execute(executor, unprivileged, "read_text_file", {"path": "notes.txt"})
 
 
