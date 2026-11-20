@@ -12,6 +12,7 @@ from universal_automation.core.registry import (
     PluginRegistry,
 )
 
+
 def make_manifest(
     plugin_id: str = "example.file-tools",
     version: str = "1.0.0",
