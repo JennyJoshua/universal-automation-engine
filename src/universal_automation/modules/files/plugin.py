@@ -309,11 +309,15 @@ class FileAutomationModule:
 
         for current, directory_names, file_names in os.walk(directory, followlinks=False):
             current_path = Path(current)
-            directory_names[:] = sorted(
+            valid_directories = [
                 name
                 for name in directory_names
                 if not (current_path / name).is_symlink()
-            )
+            ]
+            if len(valid_directories) > self._max_directory_entries:
+                truncated = True
+                valid_directories = valid_directories[: self._max_directory_entries]
+            directory_names[:] = sorted(valid_directories)
             directories_scanned += 1
             if directories_scanned > self._max_scan_directories:
                 truncated = True
@@ -349,6 +353,9 @@ class FileAutomationModule:
                         raw = file_handle.read(self._max_file_bytes + 1)
                     if len(raw) > self._max_file_bytes:
                         continue
+                    if bytes_scanned + len(raw) > self._max_scan_bytes:
+                        truncated = True
+                        break
                     content = raw.decode("utf-8")
                 except (OSError, UnicodeDecodeError):
                     continue
