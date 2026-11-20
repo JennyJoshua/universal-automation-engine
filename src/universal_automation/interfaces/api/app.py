@@ -38,6 +38,9 @@ def create_app(
     api_keys: Mapping[str, ExecutionPrincipal],
 ) -> FastAPI:
     """Create an API app using host-provided registry, executor, and API keys."""
+    if executor.plugin_registry is not plugin_registry:
+        raise ValueError("executor and API must use the same plugin registry instance")
+
     authenticator = APIKeyAuthenticator(api_keys)
     api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
