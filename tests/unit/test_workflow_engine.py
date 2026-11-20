@@ -12,10 +12,8 @@ from universal_automation.core.execution import (
 from universal_automation.core.registry import PluginRegistry
 from universal_automation.security import (
     ApprovalGrant,
-    ApprovalRequiredError,
     AuthorizationPolicy,
     ExecutionPrincipal,
-    InsufficientPermissionsError,
 )
 from universal_automation.workflows import (
     WorkflowCondition,
