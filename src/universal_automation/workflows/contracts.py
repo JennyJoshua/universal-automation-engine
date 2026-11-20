@@ -93,7 +93,8 @@ class WorkflowStep(WorkflowContractModel):
     def validate_step_id(cls, value: str) -> str:
         if not _STEP_ID.fullmatch(value):
             raise ValueError(
-                "Step IDs must start with a lowercase letter and use lowercase letters, digits, or hyphens"
+                "Step IDs must start with a lowercase letter and use lowercase letters, digits, "
+                "hyphens, or underscores"
             )
         return value
 
@@ -154,7 +155,7 @@ class WorkflowDefinition(WorkflowContractModel):
                 for mapping in step.compensation.mappings:
                     if mapping.source_step_id not in allowed_sources:
                         raise ValueError(
-                            "Compensation mappings may reference only earlier steps or their own step"
+                            "Compensation mappings may reference earlier steps or their own step"
                         )
                     total_mappings += 1
             previous_steps.add(step.step_id)
