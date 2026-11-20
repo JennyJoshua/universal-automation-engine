@@ -135,7 +135,7 @@ class MCPAdapter:
 
     async def _list_tools(
         self,
-        _ctx: ServerRequestContext[Any, Any],
+        _ctx: ServerRequestContext[Any],
         _params: types.PaginatedRequestParams | None,
     ) -> types.ListToolsResult:
         tools: list[types.Tool] = []
