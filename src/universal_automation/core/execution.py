@@ -144,6 +144,11 @@ class CapabilityExecutor:
                 )
             self._handlers[key] = _HandlerBinding(plugin_id, capability_name, handler)
 
+    def has_handler(self, plugin_id: str, capability_name: str) -> bool:
+        """Return whether trusted application code is bound to a capability."""
+        with self._lock:
+            return (plugin_id, capability_name) in self._handlers
+
     def execute(
         self,
         request: ExecutionRequest,
