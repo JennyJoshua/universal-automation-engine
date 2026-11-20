@@ -256,3 +256,14 @@ def test_search_counts_binary_bytes_against_scan_budget(tmp_path) -> None:
     assert result.output_data["matches"] == []
     assert result.output_data["files_scanned"] == 2
     assert result.output_data["truncated"] is True
+
+
+def test_search_marks_large_skipped_files_as_truncated(tmp_path) -> None:
+    (tmp_path / "large.txt").write_text("needle in a large file", encoding="utf-8")
+    _, _, executor, principal = make_engine(tmp_path, max_file_bytes=5)
+
+    result = execute(executor, principal, "search_text_files", {"query": "needle"})
+
+    assert result.output_data["matches"] == []
+    assert result.output_data["files_scanned"] == 1
+    assert result.output_data["truncated"] is True
