@@ -183,10 +183,13 @@ class FileAutomationModule:
             raise HandlerInputError("A valid workspace-relative path is required")
 
         relative = Path(raw_path)
-        if relative.is_absolute() or PureWindowsPath(raw_path).is_absolute():
+        windows_path = PureWindowsPath(raw_path)
+        if relative.is_absolute() or windows_path.is_absolute() or windows_path.drive:
             raise HandlerInputError("Absolute paths are not allowed")
 
-        if any(part == ".." for part in relative.parts):
+        if any(part == ".." for part in relative.parts) or any(
+            part == ".." for part in windows_path.parts
+        ):
             raise HandlerInputError("Parent-directory traversal is not allowed")
 
         current = self._root
