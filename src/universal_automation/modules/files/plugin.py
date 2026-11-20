@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import errno
 import os
 from pathlib import Path, PureWindowsPath
 from typing import Any
@@ -23,18 +24,26 @@ class FileAutomationModule:
         max_file_bytes: int = 1_048_576,
         max_scan_files: int = 500,
         max_scan_directories: int = 1_000,
+        max_directory_entries: int = 1_000,
         max_scan_bytes: int = 10_485_760,
     ) -> None:
         root = Path(workspace_root).expanduser().resolve(strict=True)
         if not root.is_dir():
             raise ValueError("workspace_root must be an existing directory")
-        if min(max_file_bytes, max_scan_files, max_scan_directories, max_scan_bytes) < 1:
+        if min(
+            max_file_bytes,
+            max_scan_files,
+            max_scan_directories,
+            max_directory_entries,
+            max_scan_bytes,
+        ) < 1:
             raise ValueError("File automation limits must all be positive")
 
         self._root = root
         self._max_file_bytes = max_file_bytes
         self._max_scan_files = max_scan_files
         self._max_scan_directories = max_scan_directories
+        self._max_directory_entries = max_directory_entries
         self._max_scan_bytes = max_scan_bytes
         self._manifest = self._build_manifest()
         self._handlers = {
@@ -207,30 +216,42 @@ class FileAutomationModule:
             raise HandlerInputError("The requested path is not a directory")
 
         max_results = data.get("max_results", 100)
-        entries = sorted(directory.iterdir(), key=lambda item: item.name.casefold())
-        files: list[dict[str, Any]] = []
+        entries: list[dict[str, Any]] = []
         truncated = False
 
-        for entry in entries:
-            if entry.is_symlink():
-                continue
-            if not entry.is_file() and not entry.is_dir():
-                continue
-            if len(files) >= max_results:
-                truncated = True
-                break
+        with os.scandir(directory) as iterator:
+            for scanned, entry in enumerate(iterator, start=1):
+                if scanned > self._max_directory_entries:
+                    truncated = True
+                    break
+                try:
+                    if entry.is_symlink():
+                        continue
+                    if entry.is_file(follow_symlinks=False):
+                        kind = "file"
+                        size_bytes = entry.stat(follow_symlinks=False).st_size
+                    elif entry.is_dir(follow_symlinks=False):
+                        kind = "directory"
+                        size_bytes = 0
+                    else:
+                        continue
+                except OSError:
+                    continue
 
-            stat = entry.stat()
-            files.append(
-                {
-                    "name": entry.name,
-                    "path": self._relative_path(entry),
-                    "kind": "directory" if entry.is_dir() else "file",
-                    "size_bytes": stat.st_size if entry.is_file() else 0,
-                }
-            )
+                entry_path = Path(entry.path)
+                entries.append(
+                    {
+                        "name": entry.name,
+                        "path": self._relative_path(entry_path),
+                        "kind": kind,
+                        "size_bytes": size_bytes,
+                    }
+                )
 
-        return {"files": files, "truncated": truncated}
+        entries.sort(key=lambda item: item["name"].casefold())
+        if len(entries) > max_results:
+            truncated = True
+        return {"files": entries[:max_results], "truncated": truncated}
 
     def _read_text_file(self, data: dict[str, Any]) -> dict[str, Any]:
         target = self._resolve_workspace_path(data["path"])
@@ -240,9 +261,15 @@ class FileAutomationModule:
             raise HandlerInputError("The requested path is not a file")
 
         try:
-            with target.open("rb") as file_handle:
+            descriptor = os.open(
+                target,
+                os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
+            )
+            with os.fdopen(descriptor, "rb") as file_handle:
                 raw = file_handle.read(self._max_file_bytes + 1)
-        except OSError:
+        except OSError as exc:
+            if exc.errno == errno.ELOOP:
+                raise HandlerInputError("Symbolic links are not supported") from exc
             raise
 
         if len(raw) > self._max_file_bytes:
@@ -291,6 +318,11 @@ class FileAutomationModule:
                 if file_path.is_symlink() or not file_path.is_file():
                     continue
 
+                if files_scanned >= self._max_scan_files:
+                    truncated = True
+                    break
+                files_scanned += 1
+
                 try:
                     size = file_path.stat().st_size
                 except OSError:
@@ -298,15 +330,16 @@ class FileAutomationModule:
 
                 if size > self._max_file_bytes:
                     continue
-                if files_scanned >= self._max_scan_files:
-                    truncated = True
-                    break
                 if bytes_scanned + size > self._max_scan_bytes:
                     truncated = True
                     break
 
                 try:
-                    with file_path.open("rb") as file_handle:
+                    descriptor = os.open(
+                        file_path,
+                        os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
+                    )
+                    with os.fdopen(descriptor, "rb") as file_handle:
                         raw = file_handle.read(self._max_file_bytes + 1)
                     if len(raw) > self._max_file_bytes:
                         continue
@@ -314,7 +347,6 @@ class FileAutomationModule:
                 except (OSError, UnicodeDecodeError):
                     continue
 
-                files_scanned += 1
                 bytes_scanned += len(raw)
                 relative_path = self._relative_path(file_path)
 
