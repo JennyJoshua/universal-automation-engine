@@ -312,13 +312,15 @@ class StructuredDataModule:
     def _write_csv(self, data: dict[str, Any]) -> dict[str, Any]:
         self._validate_payload_size(data)
         headers, rows = data["headers"], data["rows"]
+        if any(not header.strip() for header in headers):
+            raise HandlerInputError("CSV headers cannot be empty")
         if len(headers) != len(set(headers)):
             raise HandlerInputError("CSV headers must be unique")
         if any(len(row) != len(headers) for row in rows):
             raise HandlerInputError("Every CSV row must match the header column count")
         buffer = io.StringIO(newline="")
         writer = csv.writer(buffer, lineterminator="\n")
-        writer.writerow(headers)
+        writer.writerow([self._safe_csv_cell(header) for header in headers])
         for row in rows:
             writer.writerow([self._safe_csv_cell(value) for value in row])
         try:
