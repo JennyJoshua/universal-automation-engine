@@ -40,7 +40,10 @@ def make_system():
         CapabilitySpec(
             name="create_order",
             description="Create an order.",
-            input_schema=schema({"customer": schema({"email": {"type": "string"}}, ["email"])}, ["customer"]),
+            input_schema=schema(
+                {"customer": schema({"email": {"type": "string"}}, ["email"])},
+                ["customer"],
+            ),
             output_schema=schema(
                 {
                     "order_id": {"type": "string"},
@@ -54,7 +57,10 @@ def make_system():
             name="send_notice",
             description="Send an order notice.",
             input_schema=schema(
-                {"order_id": {"type": "string"}, "payload": schema({"channel": {"type": "string"}})},
+                {
+                    "order_id": {"type": "string"},
+                    "payload": schema({"channel": {"type": "string"}}),
+                },
                 ["order_id"],
             ),
             output_schema=schema({"sent": {"type": "boolean"}}, ["sent"]),
