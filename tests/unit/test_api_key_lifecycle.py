@@ -1,6 +1,6 @@
 """Tests for managed API-key issuance, authentication, rotation, and revocation."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta  # noqa: I001
 
 import pytest
 from pydantic import ValidationError
