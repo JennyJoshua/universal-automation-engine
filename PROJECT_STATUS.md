@@ -17,7 +17,8 @@ The repository has completed its initial foundation and currently contains:
 - FastAPI REST interface and an MCP adapter.
 - Shared workspace path guard.
 - Read-only file automation.
-- New Markdown, text, JSON, PDF, DOCX, and XLSX document creation (office/PDF formats use optional dependencies).\n- Bounded CSV/JSON reading and writing, JSON record transformations, and optional XLSX extraction.
+- New Markdown, text, JSON, PDF, DOCX, and XLSX document creation (office/PDF formats use optional dependencies).
+- Bounded CSV/JSON reading and writing, JSON record transformations, and optional XLSX extraction.
 - Unit, API, MCP, and integration test suites.
 
 This is an implemented development baseline, **not yet a production-ready or stable v1.0 release**.
