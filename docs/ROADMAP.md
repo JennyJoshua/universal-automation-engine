@@ -41,17 +41,17 @@ This roadmap distinguishes existing implementation from planned work. Batch comp
 
 ## Batch 3 — Workflow orchestration
 
-**Status: In progress**
+**Status: Implemented; PR #24 awaiting merge**
 
-- [ ] Define versioned workflow and step contracts.
-- [ ] Execute multiple registered capabilities in a deterministic sequence.
-- [ ] Add explicit input/output mapping between steps.
-- [ ] Add conditional branching with a deliberately limited expression model.
-- [ ] Track queued, running, succeeded, failed, and cancelled states.
-- [ ] Define failure, retry, and compensation semantics.
-- [ ] Enforce authorization independently for every step.
-- [ ] Add workflow validation and cycle/complexity limits.
-- [ ] Add integration tests covering success and failure paths.
+- [x] Define versioned workflow and step contracts.
+- [x] Execute multiple registered capabilities in a deterministic sequence.
+- [x] Add explicit input/output mapping between steps.
+- [x] Add conditional branching with a deliberately limited expression model.
+- [x] Track queued, running, succeeded, failed, and cancelled states.
+- [x] Define failure, retry, and compensation semantics.
+- [x] Enforce authorization independently for every step.
+- [x] Add workflow validation and cycle/complexity limits.
+- [x] Add integration tests covering success and failure paths.
 
 **Exit criteria:** A validated workflow can combine existing capabilities safely, with predictable state and failure behavior.
 
