@@ -79,6 +79,10 @@ class OutputValidationError(ExecutionError):
         super().__init__("Capability output does not satisfy its declared schema")
 
 
+class HandlerInputError(ExecutionError):
+    """Raised for safe, expected input or workspace-operation failures."""
+
+
 class HandlerExecutionError(ExecutionError):
     """Raised when a trusted capability handler fails."""
 
@@ -179,6 +183,8 @@ class CapabilityExecutor:
         started = perf_counter()
         try:
             output_data = binding.handler(input_data)
+        except HandlerInputError:
+            raise
         except Exception as exc:
             raise HandlerExecutionError() from exc
 

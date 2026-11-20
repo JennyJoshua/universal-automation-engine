@@ -22,6 +22,7 @@ from universal_automation.core.execution import (
     CapabilityExecutor,
     ExecutionRequest,
     HandlerExecutionError,
+    HandlerInputError,
     HandlerNotRegisteredError,
     InputValidationError,
     OutputValidationError,
@@ -214,6 +215,8 @@ class MCPAdapter:
             return self._tool_error("Execution is not authorized")
         except InputValidationError:
             return self._tool_error("Input does not satisfy the declared capability schema")
+        except HandlerInputError as exc:
+            return self._tool_error(str(exc))
         except (HandlerNotRegisteredError, PluginNotFoundError, CapabilityNotFoundError):
             return self._tool_error("Capability is unavailable")
         except (HandlerExecutionError, OutputValidationError):
