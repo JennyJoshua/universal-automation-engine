@@ -2,8 +2,8 @@
 
 from datetime import UTC, datetime, timedelta
 
-import pytest
 from pydantic import ValidationError
+from pytest import mark, raises
 
 from universal_automation.security import (
     APIKeyAuthenticationError,
@@ -50,23 +50,23 @@ def test_authentication_returns_a_trusted_principal():
     assert principal.permissions == {"files.read", "reports.create"}
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "candidate",
     [None, "", "malformed", "uae_1234.bad", "uae_" + "a" * 16 + "." + "x" * 200],
 )
 def test_malformed_keys_fail_closed(candidate):
     manager, _ = issue()
 
-    with pytest.raises(APIKeyAuthenticationError):
+    with raises(APIKeyAuthenticationError):
         manager.authenticate(candidate, now=NOW)
 
 
 def test_unknown_and_tampered_keys_fail_closed():
     manager, issued = issue()
 
-    with pytest.raises(APIKeyAuthenticationError):
+    with raises(APIKeyAuthenticationError):
         manager.authenticate("uae_" + "0" * 16 + "." + "x" * 48, now=NOW)
-    with pytest.raises(APIKeyAuthenticationError):
+    with raises(APIKeyAuthenticationError):
         manager.authenticate(issued.api_key + "tampered", now=NOW)
 
 
@@ -75,7 +75,7 @@ def test_expiry_is_exclusive():
     record = manager.store.get(issued.key_id)
     assert record is not None
 
-    with pytest.raises(APIKeyAuthenticationError):
+    with raises(APIKeyAuthenticationError):
         manager.authenticate(issued.api_key, now=record.expires_at)
 
 
@@ -84,7 +84,7 @@ def test_revoke_invalidates_key_and_is_idempotently_reported():
 
     assert manager.revoke(issued.key_id, now=NOW) is True
     assert manager.revoke(issued.key_id, now=NOW) is False
-    with pytest.raises(APIKeyAuthenticationError):
+    with raises(APIKeyAuthenticationError):
         manager.authenticate(issued.api_key, now=NOW)
 
 
@@ -97,7 +97,7 @@ def test_rotation_preserves_identity_and_permissions_but_invalidates_old_key():
         now=NOW,
     )
 
-    with pytest.raises(APIKeyAuthenticationError):
+    with raises(APIKeyAuthenticationError):
         manager.authenticate(old_key.api_key, now=NOW)
     principal = manager.authenticate(new_key.api_key, now=NOW)
     assert principal.subject_id == "staff-user-1"
@@ -109,7 +109,7 @@ def test_expired_key_cannot_be_rotated():
     record = manager.store.get(issued.key_id)
     assert record is not None
 
-    with pytest.raises(APIKeyAuthenticationError):
+    with raises(APIKeyAuthenticationError):
         manager.rotate(
             issued.key_id,
             record.expires_at + timedelta(days=1),
@@ -119,14 +119,14 @@ def test_expired_key_cannot_be_rotated():
 
 def test_expiry_must_be_future_and_timezone_aware():
     manager = APIKeyManager()
-    with pytest.raises(ValueError, match="future"):
+    with raises(ValueError, match="future"):
         manager.issue("user", set(), NOW, now=NOW)
-    with pytest.raises(ValueError, match="timezone-aware"):
+    with raises(ValueError, match="timezone-aware"):
         manager.issue("user", set(), datetime(2026, 12, 1))
 
 
 def test_naive_record_timestamps_are_rejected():
-    with pytest.raises(ValidationError, match="timezone-aware"):
+    with raises(ValidationError, match="timezone-aware"):
         APIKeyRecord(
             key_id="a" * 16,
             key_digest="b" * 64,
@@ -148,5 +148,5 @@ def test_store_returns_defensive_record_copies():
 
 def test_permissions_are_validated_by_execution_principal():
     manager = APIKeyManager()
-    with pytest.raises(ValidationError, match="Invalid permission"):
+    with raises(ValidationError, match="Invalid permission"):
         manager.issue("user", {"Admin Access"}, NOW + timedelta(days=1), now=NOW)
