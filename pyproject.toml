@@ -12,6 +12,7 @@ authors = [{ name = "Universal Automation Engine contributors" }]
 dependencies = [
   "fastapi>=0.115,<1.0",
   "pydantic>=2.9,<3.0",
+  "jsonschema>=4.23,<5.0",
 ]
 
 [project.optional-dependencies]
