@@ -252,3 +252,15 @@ def test_authenticator_rejects_unknown_key() -> None:
 
     with pytest.raises(AuthenticationError):
         authenticator.authenticate("z" * 40)
+
+
+def test_app_rejects_mismatched_registry_and_executor() -> None:
+    _, executor = make_client_system()
+    other_registry = PluginRegistry()
+
+    with pytest.raises(ValueError, match="same plugin registry"):
+        create_app(
+            other_registry,
+            executor,
+            {VALID_API_KEY: ExecutionPrincipal(subject_id="api-user")},
+        )
