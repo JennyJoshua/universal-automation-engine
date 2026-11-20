@@ -13,6 +13,7 @@ A modular, API-first Python automation engine that exposes reusable automation c
 - MCP adapter for compatible clients.
 - Workspace-confined, read-only file automation.
 - New Markdown, text, JSON, PDF, DOCX, and XLSX document creation.
+- Bounded CSV/JSON data operations, record transformations, and optional XLSX extraction.
 - Automated tests and CI for Python 3.12 and 3.13.
 
 See [Project Status](PROJECT_STATUS.md) for the verified implementation snapshot and known limitations.
@@ -26,6 +27,7 @@ See [Project Status](PROJECT_STATUS.md) for the verified implementation snapshot
 - [Capability execution](docs/CAPABILITY_EXECUTION.md)
 - [File automation](docs/FILE_AUTOMATION.md)
 - [Document automation](docs/DOCUMENT_AUTOMATION.md)
+- [Structured data automation](docs/STRUCTURED_DATA_AUTOMATION.md)
 
 ## Installation
 
@@ -44,6 +46,7 @@ Install optional integrations as needed:
 python -m pip install -e ".[mcp]"
 
 # PDF, Word, and Excel document generation
+# Structured data XLSX extraction
 python -m pip install -e ".[documents]"
 
 # All current optional integrations for development/testing

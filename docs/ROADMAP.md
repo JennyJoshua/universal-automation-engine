@@ -24,18 +24,18 @@ This roadmap distinguishes existing implementation from planned work. Batch comp
 
 ## Batch 2 — Structured data automation
 
-**Status: Not started**
+**Status: Implemented; PR #21 awaiting merge**
 
-- [ ] Define a data plugin contract and capability schemas.
-- [ ] Add safe CSV reading and writing.
-- [ ] Add JSON parsing, transformation, and serialization.
-- [ ] Add spreadsheet data extraction and processing using optional dependencies.
-- [ ] Support bounded filtering, sorting, projection, and validation.
-- [ ] Enforce file size, row, column, and output limits.
-- [ ] Prevent formula injection in spreadsheet exports.
-- [ ] Enforce workspace confinement and explicit permissions.
-- [ ] Expose capabilities through REST and MCP discovery/execution.
-- [ ] Add unit, integration, and adversarial tests.
+- [x] Define a data plugin contract and capability schemas.
+- [x] Add safe CSV reading and writing.
+- [x] Add JSON parsing, transformation, and serialization.
+- [x] Add spreadsheet data extraction and processing using optional dependencies.
+- [x] Support bounded filtering, sorting, projection, and validation.
+- [x] Enforce file size, row, column, and output limits.
+- [x] Prevent formula injection in spreadsheet exports.
+- [x] Enforce workspace confinement and explicit permissions.
+- [x] Expose capabilities through REST and MCP discovery/execution.
+- [x] Add unit, integration, and adversarial tests.
 
 **Exit criteria:** Supported data operations are bounded, validated, permission-controlled, documented, and available through both interfaces.
 
