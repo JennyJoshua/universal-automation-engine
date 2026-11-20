@@ -36,7 +36,12 @@ class WorkflowInputMapping(WorkflowContractModel):
     @field_validator("source_path", "target_path")
     @classmethod
     def validate_path(cls, value: str) -> str:
-        if not _PATH.fullmatch(value) or len(value.split(".")) > MAX_PATH_DEPTH:
+        segments = value.split(".")
+        if (
+            not _PATH.fullmatch(value)
+            or len(segments) > MAX_PATH_DEPTH
+            or any(segment.startswith("__") for segment in segments)
+        ):
             raise ValueError("Workflow paths must use safe object keys with a maximum depth of 10")
         return value
 
@@ -52,7 +57,12 @@ class WorkflowCondition(WorkflowContractModel):
     @field_validator("source_path")
     @classmethod
     def validate_source_path(cls, value: str) -> str:
-        if not _PATH.fullmatch(value) or len(value.split(".")) > MAX_PATH_DEPTH:
+        segments = value.split(".")
+        if (
+            not _PATH.fullmatch(value)
+            or len(segments) > MAX_PATH_DEPTH
+            or any(segment.startswith("__") for segment in segments)
+        ):
             raise ValueError("Condition paths must use safe object keys with a maximum depth of 10")
         return value
 
@@ -116,7 +126,7 @@ class WorkflowDefinition(WorkflowContractModel):
     """A versioned, sequential workflow with bounded references and complexity."""
 
     workflow_id: str = Field(min_length=1, max_length=100)
-    version: str = Field(min_length=5, max_length=32)
+    version: str = Field(min_length=1, max_length=32)
     contract_version: Literal["1.0"] = "1.0"
     description: str = Field(min_length=1, max_length=1000)
     steps: tuple[WorkflowStep, ...] = Field(min_length=1, max_length=MAX_WORKFLOW_STEPS)
