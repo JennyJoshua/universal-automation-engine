@@ -13,7 +13,8 @@ A modular, API-first Python automation engine that exposes reusable automation c
 - MCP adapter for compatible clients.
 - Workspace-confined, read-only file automation.
 - New Markdown, text, JSON, PDF, DOCX, and XLSX document creation.
-- Bounded CSV/JSON data operations, record transformations, and optional XLSX extraction.\n- Sequential, validated workflows with explicit mappings, conditions, authorization, and compensation.
+- Bounded CSV/JSON data operations, record transformations, and optional XLSX extraction.
+- Sequential, validated workflows with explicit mappings, conditions, authorization, and compensation.
 - Automated tests and CI for Python 3.12 and 3.13.
 
 See [Project Status](PROJECT_STATUS.md) for the verified implementation snapshot and known limitations.
