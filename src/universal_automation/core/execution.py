@@ -7,6 +7,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from time import perf_counter
+from threading import RLock
 from typing import Any, Callable
 
 from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
@@ -109,7 +110,7 @@ class CapabilityExecutor:
         self._plugin_registry = plugin_registry
         self._authorization_policy = authorization_policy
         self._handlers: dict[tuple[str, str], _HandlerBinding] = {}
-        self._lock = __import__("threading").RLock()
+        self._lock = RLock()
 
     def register_handler(
         self,
