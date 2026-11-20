@@ -90,7 +90,12 @@ class DocumentAutomationModule:
             "type": "object",
             "properties": {
                 "path": {"type": "string", "minLength": 1},
-                "sheet_name": {"type": "string", "minLength": 1, "maxLength": 31, "default": "Sheet1"},
+                "sheet_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 31,
+                    "default": "Sheet1",
+                },
                 "headers": {
                     "type": "array",
                     "minItems": 1,
