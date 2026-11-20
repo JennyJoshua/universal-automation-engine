@@ -8,6 +8,7 @@ from universal_automation.core.execution import (
     CapabilityExecutor,
     ExecutionRequest,
     HandlerInputError,
+    InputValidationError,
 )
 from universal_automation.core.registry import PluginRegistry
 from universal_automation.modules.data import StructuredDataModule
@@ -191,7 +192,7 @@ def test_transform_records_filters_sorts_projects_and_limits(tmp_path):
 
 def test_transform_records_rejects_non_object_records_and_incompatible_sort(tmp_path):
     _, _, executor, principal = make_engine(tmp_path)
-    with pytest.raises(HandlerInputError, match="JSON object"):
+    with pytest.raises(InputValidationError):
         execute(executor, principal, "transform_records", {"records": [{"a": 1}, "bad"]})
     with pytest.raises(HandlerInputError, match="compatible types"):
         execute(
