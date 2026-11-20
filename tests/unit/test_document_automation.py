@@ -64,6 +64,7 @@ def test_module_registers_three_document_creation_capabilities(tmp_path) -> None
 def test_create_markdown_document_writes_expected_content(tmp_path) -> None:
     _, _, executor, principal = make_engine(tmp_path)
 
+    (tmp_path / "reports").mkdir()
     result = execute(
         executor,
         principal,
@@ -73,9 +74,7 @@ def test_create_markdown_document_writes_expected_content(tmp_path) -> None:
             "title": "Monthly Summary",
             "content": "Revenue increased.",
         },
-    ) if (tmp_path / "reports").mkdir() is None else None
-
-    assert result is not None
+    )
     assert result.output_data["path"] == "reports/summary.md"
     assert result.output_data["created"] is True
     assert (tmp_path / "reports" / "summary.md").read_text(encoding="utf-8") == (
@@ -93,13 +92,14 @@ def test_create_text_document_writes_utf8_content(tmp_path) -> None:
         {"path": "notes.txt", "content": "Hello Papua New Guinea."},
     )
 
-    assert result.output_data["size_bytes"] == len("Hello Papua New Guinea.".encode("utf-8"))
+    assert result.output_data["size_bytes"] == len(b"Hello Papua New Guinea.")
     assert (tmp_path / "notes.txt").read_text(encoding="utf-8") == "Hello Papua New Guinea."
 
 
 def test_create_json_document_writes_valid_formatted_json(tmp_path) -> None:
     _, _, executor, principal = make_engine(tmp_path)
 
+    (tmp_path / "data").mkdir()
     result = execute(
         executor,
         principal,
@@ -108,9 +108,7 @@ def test_create_json_document_writes_valid_formatted_json(tmp_path) -> None:
             "path": "data/result.json",
             "data": {"status": "ready", "count": 3},
         },
-    ) if (tmp_path / "data").mkdir() is None else None
-
-    assert result is not None
+    )
     assert result.output_data["path"] == "data/result.json"
     assert json.loads((tmp_path / "data" / "result.json").read_text(encoding="utf-8")) == {
         "status": "ready",
