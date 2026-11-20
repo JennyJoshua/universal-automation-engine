@@ -93,10 +93,11 @@ Connecting a custom MCP server to ChatGPT requires an eligible ChatGPT workspace
 
 - Full custom MCP support, including write/modify actions, is available for ChatGPT Business and Enterprise/Edu workspaces on web.
 - Pro supports more limited custom MCP use for read/fetch actions.
+- Free is not listed as a supported plan for custom MCP server connections.
 - Custom MCP connections are not available directly in the ChatGPT mobile app.
 - OAuth providers used with ChatGPT should support refresh tokens (commonly the `offline_access` scope) to maintain connectivity.
 
-The current Free ChatGPT account cannot be assumed to connect to this custom MCP server. This does not prevent local development or testing with other MCP clients. We will not purchase or upgrade a plan as part of this implementation.
+The current Free ChatGPT account cannot connect to this custom MCP server through the documented custom-MCP workflow. The server can still be developed and tested locally or with other MCP clients. We will not purchase or upgrade a plan as part of this implementation.
 
 ## Security boundaries and limitations
 
