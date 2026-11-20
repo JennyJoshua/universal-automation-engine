@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import re
 from datetime import UTC, datetime
+from threading import RLock
+from typing import Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -12,6 +14,7 @@ from universal_automation.core.registry import RegisteredCapability
 _PERMISSION_PATTERN = re.compile(r"^[a-z][a-z0-9]*(?:[._:-][a-z0-9]+)*$")
 _PLUGIN_ID_PATTERN = re.compile(r"^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$")
 _CAPABILITY_NAME_PATTERN = re.compile(r"^[a-z][a-z0-9_]{0,63}$")
+_DIGEST_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
 
 class SecurityModel(BaseModel):
@@ -47,6 +50,8 @@ class ApprovalGrant(SecurityModel):
     plugin_id: str = Field(min_length=1, max_length=100)
     capability_name: str = Field(min_length=1, max_length=64)
     request_id: str = Field(min_length=1, max_length=200)
+    resource_id: str | None = Field(default=None, max_length=200)
+    input_digest: str = Field(min_length=64, max_length=64)
     approved_at: datetime
     expires_at: datetime
 
@@ -62,6 +67,20 @@ class ApprovalGrant(SecurityModel):
     def validate_capability_name(cls, value: str) -> str:
         if not _CAPABILITY_NAME_PATTERN.fullmatch(value):
             raise ValueError("Invalid capability identifier")
+        return value
+
+    @field_validator("input_digest")
+    @classmethod
+    def validate_input_digest(cls, value: str) -> str:
+        if not _DIGEST_PATTERN.fullmatch(value):
+            raise ValueError("Approval input digest must be a SHA-256 hexadecimal digest")
+        return value
+
+    @field_validator("resource_id")
+    @classmethod
+    def validate_resource_id(cls, value: str | None) -> str | None:
+        if value is not None and not value.strip():
+            raise ValueError("Resource ID cannot be empty")
         return value
 
     @field_validator("approved_at", "expires_at")
@@ -100,6 +119,30 @@ class InvalidApprovalError(AuthorizationError):
     """Raised when an approval does not match or is not currently valid."""
 
 
+
+
+class ApprovalConsumptionStore(Protocol):
+    """Atomic one-time approval consumption contract."""
+
+    def consume_grant(self, grant: ApprovalGrant, now: datetime) -> bool:
+        """Consume a valid grant once and reject replays."""
+
+
+class _InMemoryGrantConsumptionStore:
+    """Fallback one-time grant tracker for hosts using trusted grants directly."""
+
+    def __init__(self) -> None:
+        self._consumed: set[str] = set()
+        self._lock = RLock()
+
+    def consume_grant(self, grant: ApprovalGrant, now: datetime) -> bool:
+        del now
+        with self._lock:
+            if grant.approval_id in self._consumed:
+                return False
+            self._consumed.add(grant.approval_id)
+            return True
+
 class AuthorizationPolicy:
     """Enforce declared permissions and request-bound approval requirements.
 
@@ -108,6 +151,16 @@ class AuthorizationPolicy:
     claims or accept a client-supplied boolean as proof of approval.
     """
 
+    def __init__(
+        self,
+        approval_store: ApprovalConsumptionStore | None = None,
+    ) -> None:
+        self._approval_store = (
+            approval_store
+            if approval_store is not None
+            else _InMemoryGrantConsumptionStore()
+        )
+
     def authorize(
         self,
         principal: ExecutionPrincipal,
@@ -115,6 +168,8 @@ class AuthorizationPolicy:
         request_id: str,
         approval: ApprovalGrant | None = None,
         *,
+        resource_id: str | None = None,
+        input_digest: str | None = None,
         now: datetime | None = None,
     ) -> None:
         """Raise a typed authorization error unless the request is permitted."""
@@ -148,10 +203,16 @@ class AuthorizationPolicy:
             and approval.plugin_id == registered_capability.plugin_id
             and approval.capability_name == registered_capability.capability.name
             and approval.request_id == request_id
+            and approval.resource_id == resource_id
+            and approval.input_digest == input_digest
         )
         is_current = approval.approved_at <= current_time < approval.expires_at
 
         if not matches_request or not is_current:
             raise InvalidApprovalError(
                 "Approval is invalid, expired, not yet active, or bound to another request"
+            )
+        if not self._approval_store.consume_grant(approval, current_time):
+            raise InvalidApprovalError(
+                "Approval has already been consumed or is no longer approved"
             )
