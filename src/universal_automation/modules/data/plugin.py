@@ -7,7 +7,6 @@ import importlib.util
 import io
 import json
 import zipfile
-from io import BytesIO
 from pathlib import Path
 from typing import Any
 
@@ -383,7 +382,7 @@ class StructuredDataModule:
 
         raw = self._read_bytes(data["path"], ".xlsx")
         try:
-            with zipfile.ZipFile(BytesIO(raw)) as archive:
+            with zipfile.ZipFile(io.BytesIO(raw)) as archive:
                 entries = archive.infolist()
                 if (
                     len(entries) > 1_000
@@ -392,7 +391,7 @@ class StructuredDataModule:
                     raise HandlerInputError(
                         "Spreadsheet expands beyond the configured safety limit"
                     )
-            workbook = load_workbook(BytesIO(raw), read_only=True, data_only=True)
+            workbook = load_workbook(io.BytesIO(raw), read_only=True, data_only=True)
             sheet_name = data.get("sheet_name")
             if sheet_name is not None and sheet_name not in workbook.sheetnames:
                 raise HandlerInputError("Worksheet was not found")
@@ -416,11 +415,21 @@ class StructuredDataModule:
             records = []
             for row in iterator:
                 if len(records) >= row_limit:
-                    return {"headers": headers, "records": records, "row_count": len(records), "truncated": True}
+                    return {
+                        "headers": headers,
+                        "records": records,
+                        "row_count": len(records),
+                        "truncated": True,
+                    }
                 values = list(row[: len(headers)])
                 values.extend([None] * (len(headers) - len(values)))
                 records.append(dict(zip(headers, values, strict=True)))
-            return {"headers": headers, "records": records, "row_count": len(records), "truncated": False}
+            return {
+                "headers": headers,
+                "records": records,
+                "row_count": len(records),
+                "truncated": False,
+            }
         except HandlerInputError:
             raise
         except Exception as exc:
