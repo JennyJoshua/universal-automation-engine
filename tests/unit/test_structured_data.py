@@ -112,6 +112,19 @@ def test_csv_write_neutralizes_formula_injection_and_creates_new_file(tmp_path):
     assert result.output_data["row_count"] == 1
 
 
+def test_csv_write_neutralizes_formula_like_headers(tmp_path):
+    _, _, executor, principal = make_engine(tmp_path)
+    execute(
+        executor,
+        principal,
+        "write_csv",
+        {"path": "headers.csv", "headers": ["=SUM(A1:A2)"], "rows": [["safe"]]},
+    )
+    assert (tmp_path / "headers.csv").read_text(encoding="utf-8").startswith(
+        "'=SUM(A1:A2)\\nsafe\\n"
+    )
+
+
 def test_csv_write_rejects_mismatched_rows_and_existing_files(tmp_path):
     (tmp_path / "existing.csv").write_text("safe", encoding="utf-8")
     _, _, executor, principal = make_engine(tmp_path)
