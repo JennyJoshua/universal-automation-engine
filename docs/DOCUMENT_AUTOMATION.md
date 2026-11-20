@@ -6,7 +6,7 @@ The first document-generation module creates new Markdown, plain-text, and JSON 
 
 Plugin ID: uae.document-tools
 
-Version: 0.1.0
+Version: 0.2.0
 
 ## Capabilities
 
@@ -81,7 +81,7 @@ JSON documents are formatted with indentation and UTF-8 encoding. Non-finite num
 
 ## Using through REST and MCP
 
-Once registered, all three capabilities appear automatically through:
+Once registered, all available document capabilities appear automatically through:
 
 - REST plugin/capability discovery and POST /v1/executions.
 - MCP tools/list discovery and tool calls.
