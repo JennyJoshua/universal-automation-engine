@@ -49,7 +49,6 @@ python -m pip install -e ".[mcp]"
 # Structured data XLSX extraction
 python -m pip install -e ".[documents]"
 
-
 # All current optional integrations for development/testing
 python -m pip install -e ".[dev,mcp,documents]"
 ```
