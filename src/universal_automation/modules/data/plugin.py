@@ -232,6 +232,14 @@ class StructuredDataModule:
             raise HandlerInputError(f"Input path must use the {extension} extension")
         return self._workspace.read_bytes(path, max_bytes=self._max_file_bytes)
 
+    def _validate_payload_size(self, value: Any) -> None:
+        try:
+            encoded = json.dumps(value, ensure_ascii=False, allow_nan=False).encode("utf-8")
+        except (TypeError, ValueError, UnicodeEncodeError) as exc:
+            raise HandlerInputError("Input must contain valid JSON-compatible values") from exc
+        if len(encoded) > self._max_file_bytes:
+            raise HandlerInputError("Structured-data input exceeds the configured size limit")
+
     def _create_file(self, path: str, extension: str, content: bytes, row_count: int) -> dict[str, Any]:
         if Path(path).suffix.casefold() != extension:
             raise HandlerInputError(f"Output path must use the {extension} extension")
@@ -284,6 +292,7 @@ class StructuredDataModule:
         return value
 
     def _write_csv(self, data: dict[str, Any]) -> dict[str, Any]:
+        self._validate_payload_size(data)
         headers, rows = data["headers"], data["rows"]
         if len(headers) != len(set(headers)):
             raise HandlerInputError("CSV headers must be unique")
@@ -310,6 +319,7 @@ class StructuredDataModule:
         return {"data": parsed}
 
     def _write_json(self, data: dict[str, Any]) -> dict[str, Any]:
+        self._validate_payload_size(data["data"])
         try:
             encoded = (json.dumps(data["data"], ensure_ascii=False, indent=2, allow_nan=False) + "\n").encode("utf-8")
         except (TypeError, ValueError, UnicodeEncodeError) as exc:
@@ -317,6 +327,7 @@ class StructuredDataModule:
         return self._create_file(data["path"], ".json", encoded, 0)
 
     def _transform_records(self, data: dict[str, Any]) -> dict[str, Any]:
+        self._validate_payload_size(data["records"])
         records = data["records"]
         filters = data.get("filters", {})
         if not all(isinstance(record, dict) for record in records):
@@ -342,6 +353,10 @@ class StructuredDataModule:
 
         raw = self._read_bytes(data["path"], ".xlsx")
         try:
+            with zipfile.ZipFile(BytesIO(raw)) as archive:
+                entries = archive.infolist()
+                if len(entries) > 1_000 or sum(item.file_size for item in entries) > self._max_file_bytes * 20:
+                    raise HandlerInputError("Spreadsheet expands beyond the configured safety limit")
             workbook = load_workbook(BytesIO(raw), read_only=True, data_only=True)
             sheet_name = data.get("sheet_name")
             if sheet_name is not None and sheet_name not in workbook.sheetnames:
@@ -353,7 +368,7 @@ class StructuredDataModule:
             iterator = sheet.iter_rows(
                 values_only=True,
                 max_col=sheet.max_column,
-                max_row=row_limit + 2,
+                max_row=min(sheet.max_row, row_limit + 2),
             )
             first_row = next(iterator, None)
             if not first_row:
