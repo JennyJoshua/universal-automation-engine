@@ -1,7 +1,5 @@
 """Tests for optional PDF, DOCX, and XLSX document generation."""
 
-from importlib.util import find_spec
-
 import pytest
 from docx import Document
 from openpyxl import load_workbook
