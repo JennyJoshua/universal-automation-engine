@@ -102,7 +102,7 @@ def test_read_text_file_returns_utf8_content(tmp_path) -> None:
     assert result.output_data == {
         "path": "notes.txt",
         "content": "Automation works.",
-        "size_bytes": len("Automation works.".encode("utf-8")),
+        "size_bytes": len(b"Automation works."),
     }
 
 
