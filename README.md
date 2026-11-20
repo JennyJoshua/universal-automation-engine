@@ -27,7 +27,7 @@ See [Project Status](PROJECT_STATUS.md) for the verified implementation snapshot
 - [Capability execution](docs/CAPABILITY_EXECUTION.md)
 - [File automation](docs/FILE_AUTOMATION.md)
 - [Document automation](docs/DOCUMENT_AUTOMATION.md)
-- [Structured data automation](docs/STRUCTURED_DATA_AUTOMATION.md)
+- [Structured data automation](docs/STRUCTURED_DATA_AUTOMATION.md)\n- [Workflow orchestration](docs/WORKFLOW_ORCHESTRATION.md)
 
 ## Installation
 
