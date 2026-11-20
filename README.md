@@ -20,6 +20,7 @@ A modular, API-first automation engine designed to expose reusable automation ca
 - MCP server: see [MCP Integration](docs/MCP_INTEGRATION.md). Install the optional `mcp` extra to enable MCP support.
 - Plugin contract: see [Plugin Contract](docs/PLUGIN_CONTRACT.md).
 - Built-in file tools: see [File Automation](docs/FILE_AUTOMATION.md).
+- Document creation: see [Document Automation](docs/DOCUMENT_AUTOMATION.md).
 
 ## Planned initial capabilities
 
