@@ -5,6 +5,7 @@ import json
 
 from fastapi.testclient import TestClient
 from mcp import Client
+from openpyxl import load_workbook
 
 from universal_automation.core.execution import CapabilityExecutor
 from universal_automation.core.registry import PluginRegistry
@@ -128,3 +129,54 @@ def test_document_overwrite_is_denied_through_rest_and_mcp(tmp_path) -> None:
 
     asyncio.run(mcp_scenario())
     assert (tmp_path / "existing.txt").read_text(encoding="utf-8") == "original"
+
+
+def test_pdf_and_excel_tools_work_through_rest_and_mcp(tmp_path) -> None:
+    registry, executor, principal = make_shared_engine(tmp_path)
+    app = create_app(registry, executor, {API_KEY: principal})
+    rest = TestClient(app)
+
+    pdf_response = rest.post(
+        "/v1/executions",
+        headers={"X-API-Key": API_KEY},
+        json={
+            "request_id": "rest-create-pdf",
+            "plugin_id": "uae.document-tools",
+            "capability_name": "create_pdf_document",
+            "input_data": {
+                "path": "rest-report.pdf",
+                "title": "REST PDF",
+                "content": "Created through REST.",
+            },
+        },
+    )
+
+    assert pdf_response.status_code == 200
+    assert (tmp_path / "rest-report.pdf").read_bytes().startswith(b"%PDF-")
+
+    mcp_adapter = MCPAdapter(registry, executor, local_principal=principal)
+
+    async def mcp_scenario() -> None:
+        async with Client(mcp_adapter._server) as client:
+            tools = await client.list_tools()
+            xlsx_tool = next(
+                tool for tool in tools.tools
+                if tool.name.endswith("_create_xlsx_document")
+            )
+            result = await client.call_tool(
+                xlsx_tool.name,
+                {
+                    "path": "mcp-report.xlsx",
+                    "headers": ["Name", "Total"],
+                    "rows": [["Item A", 10]],
+                },
+            )
+
+        assert result.is_error is False
+        assert result.structured_content["created"] is True
+
+    asyncio.run(mcp_scenario())
+
+    workbook = load_workbook(tmp_path / "mcp-report.xlsx")
+    assert workbook.active["A2"].value == "Item A"
+    assert workbook.active["B2"].value == 10
