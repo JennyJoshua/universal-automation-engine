@@ -3,7 +3,7 @@
 **Status date:** 2026-11-20  
 **Current release line:** 0.1.0 (pre-release)  
 **Default branch:** `main`  
-**Current baseline commit:** `e7e1855dc0a24e75e0207d6248f78b9067a88cfa`
+**Current baseline commit:** `231fc4448d93ecd24c060830a2d6d8b7394a0cf6`
 
 ## Executive summary
 
@@ -57,7 +57,7 @@ This is an implemented development baseline, **not yet a production-ready or sta
 | Batch | Scope | Status |
 |---|---|---|
 | 1 | Repository consolidation and project governance | Complete |
-| 2 | Structured data automation | In progress |
+| 2 | Structured data automation | Complete |
 | 3 | Workflow orchestration | Not started |
 | 4 | Authentication, authorization, and approval hardening | Not started |
 | 5 | Execution reliability and isolation | Not started |
